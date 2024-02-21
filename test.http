@@ -1,0 +1,92 @@
+@host = http://localhost:8080
+@menuId = 65d533c2c41c62ca9b9aafb6
+@itemId = 65d54264c2b18053f4b08f19
+
+### Get all menu items
+GET {{host}}/menu
+
+### Get a specific menu item
+GET {{host}}/menu/{{menuId}}
+
+### Create a new menu item
+POST {{host}}/menu
+Content-Type: application/json
+
+{
+  "name": "German",
+  "items": []
+}
+
+### Update an existing menu item
+PUT {{host}}/menu/{{menuId}}
+Content-Type: application/json
+
+{
+  "name": "Canadian",
+  "items": []
+}
+
+### Delete a menu item
+DELETE {{host}}/menu/{{menuId}}
+
+
+## Menu Items
+
+
+### Get all menu items
+GET {{host}}/menu
+
+### Get a specific menu item
+GET {{host}}/menu/1
+
+### Create a new menu item
+POST {{host}}/menu/{{menuId}}/items
+Content-Type: application/json
+
+{
+  "name": "New Dish",
+  "description": "Delicious new addition",
+  "price": 12.99,
+  "category": "Main Course",
+  "image_url": "http://example.com/new_dish.jpg",
+  "ingredients": ["ingredient1", "ingredient2"],
+  "allergens": ["allergen1", "allergen2"]
+}
+
+### Create a new menu item in a specific menu
+POST {{host}}/menu/{{menuId}}/items
+Content-Type: application/json
+
+{
+  "name": "Mango Smoothie",
+  "description": "Fresh mangoes blended with ice and milk",
+  "price": 5.99,
+  "category": "Beverages",
+  "image_url": "http://example.com/mango_smoothie.jpg",
+  "ingredients": ["Mango", "Ice", "Milk"],
+  "allergens": ["Milk"]
+}
+
+### Get all menu items from a specific menu
+GET {{host}}/menu/{{menuId}}/items
+
+### Get a specific menu item from a specific menu
+GET {{host}}/menu/{{menuId}}/items/{{itemId}}
+
+### Update a specific menu item in a specific menu
+PUT {{host}}/menu/{{menuId}}/items/{{itemId}}
+Content-Type: application/json
+
+{
+    "id": "{{itemId}}",
+  "name": "Strawberry Smoothie",
+  "description": "Fresh strawberries blended with ice and milk",
+  "price": 6.99,
+  "category": "Beverages",
+  "image_url": "http://example.com/strawberry_smoothie.jpg",
+  "ingredients": ["Strawberry", "Ice", "Milk"],
+  "allergens": ["Milk"]
+}
+
+### Delete a specific menu item from a specific menu
+DELETE {{host}}/menu/{{menuId}}/items/{{itemId}}

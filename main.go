@@ -28,6 +28,14 @@ func main() {
 
 	db.Connect(mongoURI)
 
+	setUpRoutes(r)
+
+	// Start the server
+	r.Run(":8080") // listen and serve on 0.0.0.0:8080
+}
+
+func setUpRoutes(r *gin.Engine) {
+
 	menuRoutes := r.Group("/menu")
 	{
 		// Routes for Menu operations
@@ -77,7 +85,4 @@ func main() {
 		kitchenOrderRoutes.PUT("/:orderId", handlers.UpdateKitchenOrder)
 		kitchenOrderRoutes.DELETE("/:orderId", handlers.DeleteKitchenOrder)
 	}
-
-	// Start the server
-	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

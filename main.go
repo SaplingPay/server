@@ -28,6 +28,10 @@ func main() {
 
 	db.Connect(mongoURI)
 
+	// Apply CORS middleware with allowed origins
+	allowedOrigins := []string{"http://example1.com", "http://example2.com"} // Add your allowed domains here
+	r.Use(corsMiddleware(allowedOrigins))
+
 	setUpRoutes(r)
 
 	// Start the server
@@ -84,5 +88,20 @@ func setUpRoutes(r *gin.Engine) {
 		kitchenOrderRoutes.GET("/:orderId", handlers.GetKitchenOrder)
 		kitchenOrderRoutes.PUT("/:orderId", handlers.UpdateKitchenOrder)
 		kitchenOrderRoutes.DELETE("/:orderId", handlers.DeleteKitchenOrder)
+	}
+}
+
+// corsMiddleware generates a CORS middleware function with allowed origins
+func corsMiddleware(allowedOrigins []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		origin := c.GetHeader("Origin")
+		// Check if the request origin is allowed
+		for _, allowedOrigin := range allowedOrigins {
+			if origin == allowedOrigin {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+				break
+			}
+		}
+		c.Next()
 	}
 }

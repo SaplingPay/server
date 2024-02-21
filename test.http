@@ -13,7 +13,7 @@ POST {{host}}/menu
 Content-Type: application/json
 
 {
-  "name": "German",
+  "name": "Canadian",
   "items": []
 }
 
@@ -90,3 +90,51 @@ Content-Type: application/json
 
 ### Delete a specific menu item from a specific menu
 DELETE {{host}}/menu/{{menuId}}/items/{{itemId}}
+
+
+### Create a new payment
+POST http://localhost:8080/payments
+Content-Type: application/json
+
+{
+    "order_id": "<order_id>",
+    "amount": 50.99,
+    "method": "credit_card",
+    "status": "completed",
+    "timestamp": "2024-02-21T12:30:00Z"
+}
+
+
+@paymentId = 65d54ed07045da8ba59b58cb
+
+### Get all payments
+GET http://localhost:8080/payments
+
+### Get a specific payment
+GET http://localhost:8080/payments/{{paymentId}}
+
+### Update a specific payment
+PUT http://localhost:8080/payments/{{paymentId}}
+Content-Type: application/json
+
+{
+  "id": "65d54ed07045da8ba59b58cb",
+  "order_id": "223c6f726465725f69643e22",
+  "amount": 60.99,
+  "method": "credit_card",
+  "status": "refunded",
+  "timestamp": "2024-02-21T12:30:00Z"
+}
+
+### Update a specific payment
+PUT http://localhost:8080/payments/{{paymentId}}
+Content-Type: application/json
+
+{
+    "amount": 60.99,
+    "status": "refunded"
+}
+
+### Delete a specific payment
+DELETE http://localhost:8080/payments/{{paymentId}}
+

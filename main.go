@@ -26,11 +26,15 @@ func main() {
 		log.Fatal("MONGO_URI not found in .env file")
 	}
 
-	db.Connect(mongoURI)
+	db.ConnectMongo(mongoURI)
+
+	supabaseUrl := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_KEY")
+	db.ConnectSupabase(supabaseUrl, supabaseKey)
 
 	// Apply CORS middleware with allowed origins
-	allowedOrigins := []string{"http://example1.com", "http://example2.com"} // Add your allowed domains here
-	r.Use(corsMiddleware(allowedOrigins))
+	// allowedOrigins := []string{"http://localhost:3001", "https://server-go.fly.dev"} // Add your allowed domains here
+	// r.Use(corsMiddleware(allowedOrigins))
 
 	setUpRoutes(r)
 
@@ -89,6 +93,19 @@ func setUpRoutes(r *gin.Engine) {
 		kitchenOrderRoutes.PUT("/:orderId", handlers.UpdateKitchenOrder)
 		kitchenOrderRoutes.DELETE("/:orderId", handlers.DeleteKitchenOrder)
 	}
+
+	paymentRoutes := r.Group("/payments")
+	{
+		// Routes for payment operations
+		paymentRoutes.GET("/", handlers.GetAllPayments)
+		paymentRoutes.POST("/", handlers.CreatePayment)
+		paymentRoutes.GET("/:paymentId", handlers.GetPayment)
+		paymentRoutes.PUT("/:paymentId", handlers.UpdatePayment)
+		paymentRoutes.DELETE("/:paymentId", handlers.DeletePayment)
+	}
+
+	// Route for uploading files to Supabase storage
+	r.POST("/upload", handlers.UploadToSupabase)
 }
 
 // corsMiddleware generates a CORS middleware function with allowed origins

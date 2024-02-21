@@ -10,7 +10,7 @@ import (
 
 var DB *mongo.Database
 
-func Connect(uri string) {
+func ConnectMongo(uri string) {
 	// Set client options
 	clientOptions := options.Client().ApplyURI(uri)
 

@@ -1,5 +1,5 @@
-@host = http://localhost:8080
-@menuId = 65d533c2c41c62ca9b9aafb6
+@host = https://server-go.fly.dev
+@menuId = 65d5b9102d2e6763357728b3
 @itemId = 65d54264c2b18053f4b08f19
 
 ### Get all menu items
@@ -44,7 +44,7 @@ POST {{host}}/menu/{{menuId}}/items
 Content-Type: application/json
 
 {
-  "name": "New Dish",
+  "name": "Pizza",
   "description": "Delicious new addition",
   "price": 12.99,
   "category": "Main Course",
@@ -138,3 +138,18 @@ Content-Type: application/json
 ### Delete a specific payment
 DELETE http://localhost:8080/payments/{{paymentId}}
 
+
+### Create a new order
+POST https://server-go.fly.dev/orders
+Content-Type: application/json
+
+{
+  "table_number": 5,
+  "items": [
+    {
+      "item_id": "65d5da37d7a5efdbbe76499c",
+      "quantity": 2,
+      "special_requests": "No onions"
+    }
+  ]
+}

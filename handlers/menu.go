@@ -151,3 +151,39 @@ func GetAllMenus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, menus)
 }
+
+// GetMenuByUserID retrieves all menus associated with a specific user ID from the database
+func GetMenuByUserID(c *gin.Context) {
+	userID := c.Param("userId") // Assuming userID is passed as a URL parameter
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var menus []models.Menu
+	// Assuming the collection name that stores menus is "menus"
+	// Adjust the filter to match the user_id field with the userID parameter
+	filter := bson.M{"user_id": userID}
+	cursor, err := db.DB.Collection("menus").Find(ctx, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var menu models.Menu
+		if err := cursor.Decode(&menu); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		menus = append(menus, menu)
+	}
+
+	if err := cursor.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Respond with the found menus
+	c.JSON(http.StatusOK, menus)
+}

@@ -12,6 +12,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/gin-contrib/cors v1.5.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -31,6 +32,8 @@ require (
 	github.com/nedpals/postgrest-go v0.1.3 // indirect
 	github.com/nedpals/supabase-go v0.4.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
+	github.com/rs/cors v1.8.1 // indirect
+	github.com/rs/cors/wrapper/gin v0.0.0-20240209234054-af821aecfc8d // indirect
 	github.com/supabase-community/storage-go v0.7.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/SaplingPay/server/db"
@@ -21,10 +22,12 @@ func CreateMenuItem(c *gin.Context) {
 
 	var menuItem models.MenuItem
 	if err := c.ShouldBindJSON(&menuItem); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Println(menuItem)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -34,6 +37,8 @@ func CreateMenuItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu ID format"})
 		return
 	}
+
+	log.Println(objID)
 
 	// Generate a new ObjectID for the menu item
 	menuItem.ID = primitive.NewObjectID()
@@ -46,6 +51,8 @@ func CreateMenuItem(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	log.Println(menuItem)
 
 	c.JSON(http.StatusOK, menuItem)
 }
@@ -92,11 +99,10 @@ func GetMenuItem(c *gin.Context) {
 	// If the item is not found in the loop
 	c.JSON(http.StatusNotFound, gin.H{"error": "menu item not found"})
 }
-
 func UpdateMenuItem(c *gin.Context) {
 	menuID := c.Param("menuId")
 	menuItemID := c.Param("itemId")
-
+	log.Println("UpdateMenuItem")
 	var menuItem models.MenuItem
 	if err := c.ShouldBindJSON(&menuItem); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -113,6 +119,8 @@ func UpdateMenuItem(c *gin.Context) {
 		return
 	}
 
+	log.Println(objMenuID)
+
 	// Convert menuItemID from string to primitive.ObjectID for matching in array
 	objMenuItemID, err := primitive.ObjectIDFromHex(menuItemID)
 	if err != nil {
@@ -120,12 +128,25 @@ func UpdateMenuItem(c *gin.Context) {
 		return
 	}
 
-	menuItem.ID = primitive.NilObjectID // Ensure the ID is not included in the update
+	log.Println(objMenuItemID)
+
+	// Prepare update document
+	update := bson.M{}
+	menuItemType := reflect.TypeOf(menuItem)
+	menuItemValue := reflect.ValueOf(menuItem)
+	for i := 0; i < menuItemType.NumField(); i++ {
+		field := menuItemType.Field(i)
+		fieldValue := menuItemValue.Field(i).Interface()
+		if !reflect.DeepEqual(fieldValue, reflect.Zero(field.Type).Interface()) {
+			update["items.$."+field.Tag.Get("bson")] = fieldValue
+		}
+	}
+
+	log.Println(update)
 
 	// Update the specified menu item within the menu document
 	filter := bson.M{"_id": objMenuID, "items._id": objMenuItemID}
-	update := bson.M{"$set": bson.M{"items.$": menuItem}}
-	_, err = db.DB.Collection("menus").UpdateOne(ctx, filter, update)
+	_, err = db.DB.Collection("menus").UpdateOne(ctx, filter, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

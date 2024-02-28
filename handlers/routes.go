@@ -12,6 +12,7 @@ func SetUpRoutes(r *gin.Engine) {
 		menuRoutes.GET("/:menuId", GetMenu)
 		menuRoutes.PUT("/:menuId", UpdateMenu)
 		menuRoutes.DELETE("/:menuId", DeleteMenu)
+		menuRoutes.PUT("/archive/:menuId", ArchiveMenu)
 
 		// Nested routes for Menu Item operations under a specific Menu
 		menuItemRoutes := menuRoutes.Group("/:menuId/items")
@@ -21,6 +22,7 @@ func SetUpRoutes(r *gin.Engine) {
 			menuItemRoutes.GET("/:itemId", GetMenuItem)
 			menuItemRoutes.PUT("/:itemId", UpdateMenuItem)
 			menuItemRoutes.DELETE("/:itemId", DeleteMenuItem)
+			menuItemRoutes.PUT("/archive/:itemId", ArchiveMenuItem)
 		}
 	}
 

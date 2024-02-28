@@ -187,3 +187,30 @@ func GetMenuByUserID(c *gin.Context) {
 	// Respond with the found menus
 	c.JSON(http.StatusOK, menus)
 }
+
+// ArchiveMenu archives a menu in the database
+func ArchiveMenu(c *gin.Context) {
+	// Fetching the menu ID from the URL parameter
+	menuID := c.Param("menuId")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Assuming `menuID` needs to be converted to an ObjectID if you're using MongoDB's default ObjectID
+	// If your ID is a string in the database, you can directly use menuID in the filter
+	objID, err := primitive.ObjectIDFromHex(menuID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	// Update the menu to set the archived field to true
+	update := bson.M{"$set": bson.M{"archived": true}}
+	_, err = db.DB.Collection("menus").UpdateOne(ctx, bson.M{"_id": objID}, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Menu archived successfully"})
+}

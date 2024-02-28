@@ -217,3 +217,35 @@ func GetAllMenuItems(c *gin.Context) {
 
 	c.JSON(http.StatusOK, menu.Items)
 }
+
+func ArchiveMenuItem(c *gin.Context) {
+	menuID := c.Param("menuId")
+	menuItemID := c.Param("itemId")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Convert menuID from string to primitive.ObjectID
+	objMenuID, err := primitive.ObjectIDFromHex(menuID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu ID format"})
+		return
+	}
+
+	// Convert menuItemID from string to primitive.ObjectID for matching in array
+	objMenuItemID, err := primitive.ObjectIDFromHex(menuItemID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu item ID format"})
+		return
+	}
+
+	// Update the specified menu item within the menu document
+	filter := bson.M{"_id": objMenuID, "items._id": objMenuItemID}
+	_, err = db.DB.Collection("menus").UpdateOne(ctx, filter, bson.M{"$set": bson.M{"items.$.archived": true}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Menu item archived successfully"})
+}

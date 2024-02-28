@@ -12,6 +12,7 @@ type Menu struct {
 	BannerURL   string             `bson:"banner_url" json:"banner_url"`
 	Location    string             `bson:"location" json:"location"`
 	Description string             `bson:"description" json:"description"`
+	Archived    bool               `bson:"archived" json:"archived"`
 }
 
 // MenuItem represents a single item on the digital menu.
@@ -26,4 +27,5 @@ type MenuItem struct {
 	Allergens           []string           `bson:"allergens" json:"allergens"`
 	Customizations      []string           `bson:"customizations" json:"customizations"`
 	DietaryRestrictions []string           `bson:"dietary_restrictions" json:"dietary_restrictions"`
+	Archived            bool               `bson:"archived" json:"archived"`
 }

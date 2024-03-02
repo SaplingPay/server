@@ -15,10 +15,13 @@ func main() {
 	// Initialize the Gin engine
 	r := gin.Default()
 
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+	env := os.Getenv("ENV")
+	if env != "production" {
+		log.Println("Loading .env file")
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatalf("Error loading .env file: %v", err)
+		}
 	}
 
 	// Get the MongoDB URI from the .env file

@@ -13,6 +13,7 @@ type Menu struct {
 	Location    string             `bson:"location" json:"location"`
 	Description string             `bson:"description" json:"description"`
 	Archived    bool               `bson:"archived" json:"archived"`
+	Blurhash    BlurhashData       `bson:"blurhash" json:"blurhash"`
 }
 
 // MenuItem represents a single item on the digital menu.
@@ -28,4 +29,11 @@ type MenuItem struct {
 	Customizations      []string           `bson:"customizations" json:"customizations"`
 	DietaryRestrictions []string           `bson:"dietary_restrictions" json:"dietary_restrictions"`
 	Archived            bool               `bson:"archived" json:"archived"`
+	Blurhash            BlurhashData       `bson:"blurhash" json:"blurhash"`
+}
+
+type BlurhashData struct {
+	Hash   string `bson:"hash" json:"hash"`
+	Width  int    `bson:"width" json:"width"`
+	Height int    `bson:"height" json:"height"`
 }

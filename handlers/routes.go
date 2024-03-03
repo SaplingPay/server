@@ -46,16 +46,6 @@ func SetUpRoutes(r *gin.Engine) {
 		}
 	}
 
-	kitchenOrderRoutes := r.Group("/kitchen_orders")
-	{
-		// Routes for KitchenOrder operations
-		kitchenOrderRoutes.GET("/", GetAllKitchenOrders)
-		kitchenOrderRoutes.POST("/", CreateKitchenOrder)
-		kitchenOrderRoutes.GET("/:orderId", GetKitchenOrder)
-		kitchenOrderRoutes.PUT("/:orderId", UpdateKitchenOrder)
-		kitchenOrderRoutes.DELETE("/:orderId", DeleteKitchenOrder)
-	}
-
 	paymentRoutes := r.Group("/payments")
 	{
 		// Routes for payment operations

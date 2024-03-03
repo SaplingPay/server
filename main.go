@@ -2,12 +2,12 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
 	"github.com/SaplingPay/server/db"
 	"github.com/SaplingPay/server/handlers"
+	"github.com/SaplingPay/server/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -38,7 +38,7 @@ func main() {
 	allowedOrigins := strings.Split(allowedOriginsStr, ",")
 
 	// Apply the AllowedOriginsMiddleware globally
-	r.Use(AllowedOriginsMiddleware(allowedOrigins))
+	r.Use(middleware.AllowedOriginsMiddleware(allowedOrigins))
 
 	r.Use(cors.Default())
 
@@ -54,48 +54,4 @@ func main() {
 
 	// Start the server
 	r.Run(":8080") // listen and serve on 0.0.0.0:8080
-}
-
-func AllowedOriginsMiddleware(allowedOrigins []string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		origin := c.Request.Header.Get("Origin")
-		referer := c.Request.Header.Get("Referer")
-		clientIP := c.ClientIP()
-
-		log.Println("Request Origin:", origin)
-		log.Println("Request Referer:", referer)
-		log.Println("Client IP:", clientIP)
-
-		var allowed bool
-
-		if origin != "" && matchAllowedOrigin(origin, allowedOrigins) {
-			log.Println("Origin allowed:", origin)
-			allowed = true
-		} else if referer != "" && matchAllowedOrigin(referer, allowedOrigins) {
-			log.Println("Referer allowed:", referer)
-			allowed = true
-		} else if isLocalhost(clientIP) {
-			log.Println("Localhost allowed:", clientIP)
-			allowed = true
-		}
-
-		if allowed {
-			c.Next()
-		} else {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "Origin not allowed"})
-		}
-	}
-}
-
-func matchAllowedOrigin(origin string, allowedOrigins []string) bool {
-	for _, allowed := range allowedOrigins {
-		if origin == allowed {
-			return true
-		}
-	}
-	return false
-}
-
-func isLocalhost(ip string) bool {
-	return ip == "127.0.0.1" || ip == "::1"
 }

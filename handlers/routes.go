@@ -6,15 +6,13 @@ func SetUpRoutes(r *gin.Engine) {
 
 	menuRoutes := r.Group("/menus")
 	{
-		// Routes for Menu operations
-		menuRoutes.GET("/", GetAllMenus) // Assuming there's a GetAllMenus function
+		menuRoutes.GET("/", GetAllMenus)
 		menuRoutes.POST("/", CreateMenu)
 		menuRoutes.GET("/:menuId", GetMenu)
 		menuRoutes.PUT("/:menuId", UpdateMenu)
 		menuRoutes.DELETE("/:menuId", DeleteMenu)
 		menuRoutes.PUT("/archive/:menuId", ArchiveMenu)
 
-		// Nested routes for Menu Item operations under a specific Menu
 		menuItemRoutes := menuRoutes.Group("/:menuId/items")
 		{
 			menuItemRoutes.POST("/", CreateMenuItem)
@@ -28,14 +26,12 @@ func SetUpRoutes(r *gin.Engine) {
 
 	orderRoutes := r.Group("/orders")
 	{
-		// Routes for Order operations
 		orderRoutes.GET("/", GetAllOrders)
 		orderRoutes.POST("/", CreateOrder)
 		orderRoutes.GET("/:orderId", GetOrder)
 		orderRoutes.PUT("/:orderId", UpdateOrder)
 		orderRoutes.DELETE("/:orderId", DeleteOrder)
 
-		// Nested routes for Order Item operations under a specific Order
 		orderItemRoutes := orderRoutes.Group("/:orderId/items")
 		{
 			orderItemRoutes.POST("/", AddOrderItem)
@@ -48,7 +44,6 @@ func SetUpRoutes(r *gin.Engine) {
 
 	paymentRoutes := r.Group("/payments")
 	{
-		// Routes for payment operations
 		paymentRoutes.GET("/", GetAllPayments)
 		paymentRoutes.POST("/", CreatePayment)
 		paymentRoutes.GET("/:paymentId", GetPayment)
@@ -56,7 +51,6 @@ func SetUpRoutes(r *gin.Engine) {
 		paymentRoutes.DELETE("/:paymentId", DeletePayment)
 	}
 
-	// Routes for User operations
 	userRoutes := r.Group("/users")
 	{
 		userRoutes.POST("/", CreateUser)

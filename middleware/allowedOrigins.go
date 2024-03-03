@@ -19,13 +19,14 @@ func AllowedOriginsMiddleware(allowedOrigins []string) gin.HandlerFunc {
 
 		var allowed bool
 
-		if origin != "" && matchAllowedOrigin(origin, allowedOrigins) {
+		switch {
+		case origin != "" && matchAllowedOrigin(origin, allowedOrigins):
 			log.Println("Origin allowed:", origin)
 			allowed = true
-		} else if referer != "" && matchAllowedOrigin(referer, allowedOrigins) {
+		case referer != "" && matchAllowedOrigin(referer, allowedOrigins):
 			log.Println("Referer allowed:", referer)
 			allowed = true
-		} else if isLocalhost(clientIP) {
+		case isLocalhost(clientIP):
 			log.Println("Localhost allowed:", clientIP)
 			allowed = true
 		}

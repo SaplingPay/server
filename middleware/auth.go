@@ -93,7 +93,7 @@ func GenerateJWT() (string, error) {
 		return "", errors.New("JWT_USERNAME not found in .env file")
 	}
 
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(30 * time.Second)
 	claims := &Claims{
 		Username: JwtUsername,
 		RegisteredClaims: jwt.RegisteredClaims{

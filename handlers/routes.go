@@ -11,7 +11,9 @@ import (
 
 func SetUpRoutes(r *gin.Engine) {
 	// Set up the routes that require authentication
-	SetUpAuthRoutes(r)
+	// SetUpAuthRoutes(r)
+
+	r.POST("/getToken", middleware.GetToken)
 
 	// Wrap the routes that require authentication in the AuthMiddleware
 	r.Use(middleware.AuthMiddleware())

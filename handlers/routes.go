@@ -1,8 +1,20 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+	"os"
+	"strings"
+
+	"github.com/SaplingPay/server/middleware"
+	"github.com/gin-gonic/gin"
+)
 
 func SetUpRoutes(r *gin.Engine) {
+	// Set up the routes that require authentication
+	SetUpAuthRoutes(r)
+
+	// Wrap the routes that require authentication in the AuthMiddleware
+	r.Use(middleware.AuthMiddleware())
 
 	menuRoutes := r.Group("/menus")
 	{
@@ -64,4 +76,20 @@ func SetUpRoutes(r *gin.Engine) {
 
 	// Route for uploading files to Supabase storage
 	// r.POST("/upload", UploadToSupabase)
+}
+
+// func setup auth group
+func SetUpAuthRoutes(r *gin.Engine) {
+	basicAuthAccount := os.Getenv("AUTH_ACCOUNTS")
+	if basicAuthAccount == "" {
+		log.Fatal("Basic Auth Account not found in .env file")
+	}
+	parts := strings.Split(basicAuthAccount, ",")
+
+	authGroup := r.Group("/",
+		gin.BasicAuth(gin.Accounts{
+			parts[0]: parts[1],
+		}))
+
+	authGroup.POST("/getToken", middleware.GetToken)
 }

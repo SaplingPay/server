@@ -1,18 +1,12 @@
-# fly.toml app configuration file generated for server-go on 2024-02-20T22:40:59+01:00
+# fly.toml app configuration file generated for sapling-production-8ff757e2-f8bd-4093-bfb1-7109a6b6acdb on 2024-03-05T11:39:31+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'server-go'
+app = 'sapling-production-8ff757e2-f8bd-4093-bfb1-7109a6b6acdb'
 primary_region = 'ams'
 
 [build]
-  [build.args]
-    GO_VERSION = '1.20'
-
-[env]
-  PORT = '8080'
-  MONGO_URI = 'mongodb+srv://chris:rvWkZ3ycMSVainGg@cluster0.ewvrzic.mongodb.net/?retryWrites=true&w=majority'
 
 [http_service]
   internal_port = 8080

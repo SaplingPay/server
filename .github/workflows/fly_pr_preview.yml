@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 env:
-  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}
 
 jobs:
   preview-app:
@@ -31,8 +31,7 @@ jobs:
         uses: superfly/fly-pr-review-apps@1.2.0
         id: deploy
         with:
-          config: staging/fly_staging.toml  # ← Added
-          postgres: pg-fly-pr-staging-preview
+          config: fly.development.toml
           region: waw
           org: personal
           secrets: 'MONGO_URI_PROD=${{ secrets.MONGO_URI_PROD }} MONGO_URI_DEV=${{ secrets.MONGO_URI_DEV }} JWT_SECRET=${{ secrets.JWT_SECRET }} JWT_USERNAME=${{ secrets.JWT_USERNAME }} '

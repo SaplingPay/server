@@ -1,37 +1,17 @@
-# .github/workflows/fly_pr_preview.yml
-
-name: Start preview app
-
+name: Fly Deploy To Dev
 on:
   pull_request:
     types: [labeled, synchronize, opened, reopened, closed]
 
-concurrency:
-  group: sapling-development-f983f618-c6bc-42f7-828f-3b493539dca9
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
-env:
-  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}
-
 jobs:
-  preview-app:
-    if: contains(github.event.pull_request.labels.*.name, 'PR preview app')
+  deploy:
+    if: contains(github.event.pull_request.labels.*.name, 'Deploy to dev')
+    name: Deploy app
     runs-on: ubuntu-latest
-    name: Preview app
-    environment:
-      name: pr-${{ github.event.number }}
-      url: ${{ steps.deploy.outputs.url }}
+    concurrency: deploy-group
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Deploy preview app
-        uses: superfly/fly-pr-review-apps@1.2.0
-        id: deploy
-        with:
-          config: fly.development.toml
-          region: waw
-          org: personal
-          secrets: 'MONGO_URI_PROD=${{ secrets.MONGO_URI_PROD }} MONGO_URI_DEV=${{ secrets.MONGO_URI_DEV }} JWT_SECRET=${{ secrets.JWT_SECRET }} JWT_USERNAME=${{ secrets.JWT_USERNAME }} '
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --config fly.development.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}

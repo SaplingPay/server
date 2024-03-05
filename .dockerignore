@@ -1,0 +1,7 @@
+# flyctl launch added from .gitignore
+# local env files
+**/.env*.local
+**/.env
+**/.DS_Store
+**/.idea
+fly.toml

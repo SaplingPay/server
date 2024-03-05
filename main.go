@@ -15,20 +15,17 @@ func main() {
 
 	// Initialize the Gin engine
 	r := gin.Default()
-	mongoURI := ""
 
-	env := os.Getenv("ENV")
-	if env != "production" {
+	env := os.Getenv("SERVER_ENV")
+	if env == "local" {
 		log.Println("Loading .env file")
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatalf("Error loading .env file: %v", err)
 		}
-		mongoURI = os.Getenv("MONGO_URI_DEV")
-	} else {
-		mongoURI = os.Getenv("MONGO_URI_PROD")
 	}
 
+	mongoURI := os.Getenv("MONGO_URI")
 	if mongoURI == "" {
 		log.Fatal("MONGO_URI not found in .env file")
 	}

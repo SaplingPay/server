@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Preview app
     environment:
-      name: pr-${{ github.event.number }}
+      name: sapling-development-f983f618-c6bc-42f7-828f-3b493539dca9
       url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: Checkout

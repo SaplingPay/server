@@ -1,0 +1,17 @@
+name: Fly Deploy To Dev
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  deploy:
+    if: contains(github.event.pull_request.labels.*.name, 'Deploy to dev')
+    name: Deploy
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --config fly.development.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}

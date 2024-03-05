@@ -19,4 +19,7 @@ primary_region = 'ams'
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
-  cpus = 1
+  cpus = 2
+
+[env]
+  SERVER_ENV = "production"

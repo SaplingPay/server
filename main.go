@@ -13,7 +13,6 @@ import (
 func main() {
 	log.Println("Starting server")
 
-	// Initialize the Gin engine
 	r := gin.Default()
 	mongoURI := ""
 

@@ -7,7 +7,7 @@ on:
     types: [labeled, synchronize, opened, reopened, closed]
 
 concurrency:
-  group: ${{ github.workflow }}-pr-${{ github.event.number }}
+  group: sapling-development-f983f618-c6bc-42f7-828f-3b493539dca9
   cancel-in-progress: true
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Preview app
     environment:
-      name: sapling-development-f983f618-c6bc-42f7-828f-3b493539dca9
+      name: pr-${{ github.event.number }}
       url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: Checkout

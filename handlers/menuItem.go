@@ -99,6 +99,7 @@ func GetMenuItem(c *gin.Context) {
 	// If the item is not found in the loop
 	c.JSON(http.StatusNotFound, gin.H{"error": "menu item not found"})
 }
+
 func UpdateMenuItem(c *gin.Context) {
 	menuID := c.Param("menuId")
 	menuItemID := c.Param("itemId")

@@ -17,7 +17,15 @@ func main() {
 	r := gin.Default()
 
 	env := os.Getenv("SERVER_ENV")
-	if env == "local" {
+
+	if env == "production" {
+		log.Println("Running in production")
+		gin.SetMode(gin.ReleaseMode)
+
+	} else if env == "development" {
+		log.Println("Running in development")
+	} else {
+		log.Println("No environment set, defaulting to local")
 		log.Println("Loading .env file")
 		err := godotenv.Load()
 		if err != nil {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/SaplingPay/server/db"
@@ -58,20 +59,33 @@ func UpdateMenu(c *gin.Context) {
 		return
 	}
 
-	// Replace the document based on the ObjectID
-	result, err := db.DB.Collection("menus").ReplaceOne(ctx, bson.M{"_id": objID}, menu)
+	// Prepare the update document similarly to before
+	update := bson.M{}
+	menuType := reflect.TypeOf(menu)
+	menuValue := reflect.ValueOf(menu)
+	for i := 0; i < menuType.NumField(); i++ {
+		field := menuType.Field(i)
+		fieldValue := menuValue.Field(i).Interface()
+		if !reflect.DeepEqual(fieldValue, reflect.Zero(field.Type).Interface()) {
+			update[field.Tag.Get("bson")] = fieldValue
+		}
+	}
+
+	_, err = db.DB.Collection("menus").UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Check if a document was actually modified
-	if result.ModifiedCount == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Menu not found"})
+	// Retrieve the updated menu from the database
+	var updatedMenu models.Menu
+	err = db.DB.Collection("menus").FindOne(ctx, bson.M{"_id": objID}).Decode(&updatedMenu)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve updated menu"})
 		return
 	}
 
-	c.JSON(http.StatusOK, menu)
+	c.JSON(http.StatusOK, updatedMenu)
 }
 
 // DeleteMenu deletes a menu from the database

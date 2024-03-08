@@ -5,15 +5,16 @@ import (
 )
 
 type Menu struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name        string             `bson:"name" json:"name"`
-	Items       []MenuItem         `bson:"items" json:"items"`
-	UserID      string             `bson:"user_id,omitempty" json:"user_id"`
-	BannerURL   string             `bson:"banner_url" json:"banner_url"`
-	Location    string             `bson:"location" json:"location"`
-	Description string             `bson:"description" json:"description"`
-	Archived    bool               `bson:"archived" json:"archived"`
-	Blurhash    BlurhashData       `bson:"blurhash" json:"blurhash"`
+	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name          string             `bson:"name" json:"name"`
+	Items         []MenuItem         `bson:"items" json:"items"`
+	UserID        string             `bson:"user_id,omitempty" json:"user_id"`
+	BannerURL     string             `bson:"banner_url" json:"banner_url"`
+	Location      string             `bson:"location" json:"location"`
+	Description   string             `bson:"description" json:"description"`
+	Archived      bool               `bson:"archived" json:"archived"`
+	Blurhash      BlurhashData       `bson:"blurhash" json:"blurhash"`
+	CategoryOrder []string           `bson:"category_order" json:"category_order"`
 }
 
 // MenuItem represents a single item on the digital menu.

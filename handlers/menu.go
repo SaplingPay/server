@@ -66,7 +66,15 @@ func UpdateMenu(c *gin.Context) {
 	for i := 0; i < menuType.NumField(); i++ {
 		field := menuType.Field(i)
 		fieldValue := menuValue.Field(i).Interface()
-		if !reflect.DeepEqual(fieldValue, reflect.Zero(field.Type).Interface()) {
+		fieldType := field.Type.Kind()
+
+		if fieldType == reflect.Bool || !reflect.DeepEqual(fieldValue, reflect.Zero(field.Type).Interface()) {
+			bsonTag := field.Tag.Get("bson")
+			// Skip if bson tag is not set or is "-"
+			if bsonTag == "" || bsonTag == "-" {
+				continue
+			}
+
 			update[field.Tag.Get("bson")] = fieldValue
 		}
 	}

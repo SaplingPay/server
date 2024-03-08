@@ -30,6 +30,7 @@ type MenuItem struct {
 	DietaryRestrictions []string           `bson:"dietary_restrictions" json:"dietary_restrictions"`
 	Archived            bool               `bson:"archived" json:"archived"`
 	Blurhash            BlurhashData       `bson:"blurhash" json:"blurhash"`
+	OnOverview          bool               `bson:"on_overview" json:"on_overview"`
 }
 
 type BlurhashData struct {

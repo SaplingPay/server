@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	"io"
@@ -15,24 +16,7 @@ import (
 
 const loggerTag = "[menu-parser]"
 
-func uploadFile(client *openai.Client, r io.Reader) (string, error) {
-	log.Println(loggerTag, "Uploading file")
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r)
-
-	file, err := client.CreateFileBytes(context.Background(), openai.FileBytesRequest{
-		Name:    "menu.pdf",
-		Bytes:   buf.Bytes(),
-		Purpose: openai.PurposeAssistants,
-	})
-
-	return file.ID, err
-}
-
-func createAssistant(client *openai.Client, fileId string) (string, error) {
-	name := "menu-parser"
-	model := openai.GPT4TurboPreview
-	instructions := `
+const instructions = `
 		You are a parse for restaurant menus. Your job is to return the categories, items, descriptions and prices.
 		The menu is in a PDF format, and is attached to this request.
 		The returned message should be just a JSON object, in a valid text/json format.
@@ -53,6 +37,25 @@ func createAssistant(client *openai.Client, fileId string) (string, error) {
 			]
 		}
 	`
+
+func uploadFile(client *openai.Client, r io.Reader) (string, error) {
+	log.Println(loggerTag, "Uploading file")
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+
+	file, err := client.CreateFileBytes(context.Background(), openai.FileBytesRequest{
+		Name:    "menu.pdf",
+		Bytes:   buf.Bytes(),
+		Purpose: openai.PurposeAssistants,
+	})
+
+	return file.ID, err
+}
+
+func createAssistant(client *openai.Client, fileId string) (string, error) {
+	name := "menu-parser"
+	model := openai.GPT4TurboPreview
+	instructions := instructions
 	log.Println(loggerTag, "Creating assistant")
 	assistant, err := client.CreateAssistant(
 		context.Background(),
@@ -134,7 +137,7 @@ func cleanup(client *openai.Client, assistantId string, fileId string, threadId 
 	}
 }
 
-func parseFileUsingGPT(r io.Reader) (string, error) {
+func parseFileUsingGPTAssistant(r io.Reader) (string, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	client := openai.NewClient(apiKey)
 
@@ -176,6 +179,51 @@ func parseFileUsingGPT(r io.Reader) (string, error) {
 	return result, nil
 }
 
+func parseImageUsingGPT4Vision(r io.Reader) (string, error) {
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	client := openai.NewClient(apiKey)
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+
+	imgBase64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	result, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		Model: openai.GPT4VisionPreview,
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role: openai.ChatMessageRoleUser,
+				MultiContent: []openai.ChatMessagePart{
+					{
+						Type: openai.ChatMessagePartTypeText,
+						Text: instructions,
+					},
+					{
+						Type: openai.ChatMessagePartTypeImageURL,
+						ImageURL: &openai.ChatMessageImageURL{
+							URL:    "data:image/jpeg;base64," + imgBase64Str,
+							Detail: openai.ImageURLDetailHigh,
+						},
+					},
+				},
+			},
+		},
+		MaxTokens: 3000,
+	})
+
+	for _, choice := range result.Choices {
+		log.Println(loggerTag, "Choice:", choice.Message.Content)
+
+		for _, part := range choice.Message.MultiContent {
+			if part.Type == openai.ChatMessagePartTypeText {
+				log.Println(loggerTag, "Partial text:", part.Text)
+			}
+		}
+	}
+
+	return result.Choices[0].Message.Content, err
+}
+
 func ParseMenuCard(c *gin.Context) {
 	file, _ := c.FormFile("menu")
 	openFile, _ := file.Open()
@@ -184,13 +232,20 @@ func ParseMenuCard(c *gin.Context) {
 	log.Println(file.Filename)
 
 	contentType := file.Header.Get("Content-Type")
-	if contentType != "application/pdf" {
+	if contentType != "application/pdf" && contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/webp" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
 		return
 	}
 
-	result, _ := parseFileUsingGPT(openFile)
-	// TODO - implement better json cleanup
+	var result string
+	if contentType == "application/pdf" {
+		r, _ := parseFileUsingGPTAssistant(openFile)
+		result = r
+	} else {
+		r, _ := parseImageUsingGPT4Vision(openFile)
+		result = r
+	}
+
 	result = strings.ReplaceAll(result, "```json", "")
 	result = strings.ReplaceAll(result, "```", "")
 	resultBytes := []byte(result)

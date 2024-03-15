@@ -16,7 +16,7 @@ func SetUpRoutes(r *gin.Engine) {
 	r.POST("/getToken", middleware.GetToken)
 
 	// Wrap the routes that require authentication in the AuthMiddleware
-	r.Use(middleware.AuthMiddleware())
+	//r.Use(middleware.AuthMiddleware())
 
 	menuRoutes := r.Group("/menus")
 	{
@@ -98,6 +98,11 @@ func SetUpRoutes(r *gin.Engine) {
 		userV2Routes.GET("/:userId", GetUserV2)
 		userV2Routes.PUT("/:userId", UpdateUserV2)
 		userV2Routes.DELETE("/:userId", DeleteUserV2)
+	}
+
+	menuParserRoutes := r.Group("/menuParser")
+	{
+		menuParserRoutes.POST("/", ParseMenuCard)
 	}
 
 	r.GET("/GetMenusByUserID/:userId", GetMenuByUserID)

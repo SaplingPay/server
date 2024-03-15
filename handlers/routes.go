@@ -75,9 +75,6 @@ func SetUpRoutes(r *gin.Engine) {
 	}
 
 	r.GET("/GetMenusByUserID/:userId", GetMenuByUserID)
-
-	// Route for uploading files to Supabase storage
-	// r.POST("/upload", UploadToSupabase)
 }
 
 // func setup auth group

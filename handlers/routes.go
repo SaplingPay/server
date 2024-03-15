@@ -1,12 +1,11 @@
 package handlers
 
 import (
+	"github.com/SaplingPay/server/middleware"
+	"github.com/gin-gonic/gin"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/SaplingPay/server/middleware"
-	"github.com/gin-gonic/gin"
 )
 
 func SetUpRoutes(r *gin.Engine) {
@@ -15,8 +14,10 @@ func SetUpRoutes(r *gin.Engine) {
 
 	r.POST("/getToken", middleware.GetToken)
 
+	r.Use(middleware.WSAuthRewrite())
+
 	// Wrap the routes that require authentication in the AuthMiddleware
-	r.Use(middleware.AuthMiddleware())
+	//r.Use(middleware.AuthMiddleware())
 
 	menuRoutes := r.Group("/menus")
 	{
@@ -36,6 +37,11 @@ func SetUpRoutes(r *gin.Engine) {
 			menuItemRoutes.DELETE("/:itemId", DeleteMenuItem)
 			menuItemRoutes.PUT("/archive/:itemId", ArchiveMenuItem)
 		}
+	}
+
+	tableRoutes := r.Group("/tables")
+	{
+		tableRoutes.GET("/ws/:tableId", GetTableWSSession)
 	}
 
 	orderRoutes := r.Group("/orders")

@@ -74,7 +74,7 @@ func SetUpRoutes(r *gin.Engine) {
 		userRoutes.DELETE("/:userId", DeleteUser)
 	}
 
-	userV2Routes := r.Group("/users")
+	userV2Routes := r.Group("/usersV2")
 	{
 		userV2Routes.POST("/", CreateUserV2)
 		userV2Routes.GET("/", GetAllUsersV2)

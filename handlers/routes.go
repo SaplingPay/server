@@ -38,31 +38,31 @@ func SetUpRoutes(r *gin.Engine) {
 		}
 	}
 
-	orderRoutes := r.Group("/orders")
+	menuRoutesV2 := r.Group("/menusV2")
 	{
-		orderRoutes.GET("/", GetAllOrders)
-		orderRoutes.POST("/", CreateOrder)
-		orderRoutes.GET("/:orderId", GetOrder)
-		orderRoutes.PUT("/:orderId", UpdateOrder)
-		orderRoutes.DELETE("/:orderId", DeleteOrder)
+		menuRoutesV2.GET("/", GetAllMenusV2)
+		menuRoutesV2.POST("/", CreateMenuV2)
+		menuRoutesV2.GET("/:menuId", GetMenuV2)
+		menuRoutesV2.PUT("/:menuId", UpdateMenuV2)
+		menuRoutesV2.DELETE("/:menuId", DeleteMenuV2)
 
-		orderItemRoutes := orderRoutes.Group("/:orderId/items")
+		menuItemRoutesV2 := menuRoutesV2.Group("/:menuId/items")
 		{
-			orderItemRoutes.POST("/", AddOrderItem)
-			orderItemRoutes.GET("/", GetOrderItems)
-			orderItemRoutes.GET("/:itemId", GetOrderItem)
-			orderItemRoutes.PUT("/:itemId", UpdateOrderItem)
-			orderItemRoutes.DELETE("/:itemId", DeleteOrderItem)
+			menuItemRoutesV2.POST("/", CreateMenuItemV2)
+			menuItemRoutesV2.GET("/", GetAllMenuItemsV2)
+			menuItemRoutesV2.GET("/:itemId", GetMenuItemV2)
+			menuItemRoutesV2.PUT("/:itemId", UpdateMenuItemV2)
+			menuItemRoutesV2.DELETE("/:itemId", DeleteMenuItemV2)
 		}
 	}
 
-	paymentRoutes := r.Group("/payments")
+	venueRoutes := r.Group("/venues")
 	{
-		paymentRoutes.GET("/", GetAllPayments)
-		paymentRoutes.POST("/", CreatePayment)
-		paymentRoutes.GET("/:paymentId", GetPayment)
-		paymentRoutes.PUT("/:paymentId", UpdatePayment)
-		paymentRoutes.DELETE("/:paymentId", DeletePayment)
+		venueRoutes.GET("/", GetAllVenues)
+		venueRoutes.POST("/", CreateVenue)
+		venueRoutes.GET("/:venueId", GetVenue)
+		venueRoutes.PUT("/:venueId", UpdateVenue)
+		venueRoutes.DELETE("/:venueId", DeleteVenue)
 	}
 
 	userRoutes := r.Group("/users")
@@ -72,6 +72,15 @@ func SetUpRoutes(r *gin.Engine) {
 		userRoutes.GET("/:userId", GetUser)
 		userRoutes.PUT("/:userId", UpdateUser)
 		userRoutes.DELETE("/:userId", DeleteUser)
+	}
+
+	userV2Routes := r.Group("/users")
+	{
+		userV2Routes.POST("/", CreateUserV2)
+		userV2Routes.GET("/", GetAllUsersV2)
+		userV2Routes.GET("/:userId", GetUserV2)
+		userV2Routes.PUT("/:userId", UpdateUserV2)
+		userV2Routes.DELETE("/:userId", DeleteUserV2)
 	}
 
 	r.GET("/GetMenusByUserID/:userId", GetMenuByUserID)

@@ -26,7 +26,7 @@ type MenuV2 struct {
 
 type UserV2 struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	UserId      string             `bson:"user_id" json:"user_id"`
+	UserID      string             `bson:"user_id" json:"user_id"`
 	DisplayName string             `bson:"display_name" json:"display_name"`
 	Username    string             `bson:"username" json:"username"`
 	Email       string             `bson:"email" json:"email"`

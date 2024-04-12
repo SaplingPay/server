@@ -38,23 +38,23 @@ func SetUpRoutes(r *gin.Engine) {
 		}
 	}
 
-	menuRoutesV2 := r.Group("/menusV2")
-	{
-		menuRoutesV2.GET("/", GetAllMenusV2)
-		menuRoutesV2.POST("/", CreateMenuV2)
-		menuRoutesV2.GET("/:menuId", GetMenuV2)
-		menuRoutesV2.PUT("/:menuId", UpdateMenuV2)
-		menuRoutesV2.DELETE("/:menuId", DeleteMenuV2)
+	// menuRoutesV2 := r.Group("/menusV2")
+	// {
+	// 	menuRoutesV2.GET("/", GetAllMenusV2)
+	// 	menuRoutesV2.POST("/:venueId", CreateMenuV2)
+	// 	menuRoutesV2.GET("/:menuId", GetMenuV2)
+	// 	menuRoutesV2.PUT("/:menuId", UpdateMenuV2)
+	// 	menuRoutesV2.DELETE("/:menuId", DeleteMenuV2)
 
-		menuItemRoutesV2 := menuRoutesV2.Group("/:menuId/items")
-		{
-			menuItemRoutesV2.POST("/", CreateMenuItemV2)
-			menuItemRoutesV2.GET("/", GetAllMenuItemsV2)
-			menuItemRoutesV2.GET("/:itemId", GetMenuItemV2)
-			menuItemRoutesV2.PUT("/:itemId", UpdateMenuItemV2)
-			menuItemRoutesV2.DELETE("/:itemId", DeleteMenuItemV2)
-		}
-	}
+	// menuItemRoutesV2 := menuRoutesV2.Group("/:menuId/items")
+	// {
+	// 	menuItemRoutesV2.POST("/", CreateMenuItemV2)
+	// 	menuItemRoutesV2.GET("/", GetAllMenuItemsV2)
+	// 	menuItemRoutesV2.GET("/:itemId", GetMenuItemV2)
+	// 	menuItemRoutesV2.PUT("/:itemId", UpdateMenuItemV2)
+	// 	menuItemRoutesV2.DELETE("/:itemId", DeleteMenuItemV2)
+	// }
+	// }
 
 	venueRoutes := r.Group("/venues")
 	{
@@ -63,6 +63,23 @@ func SetUpRoutes(r *gin.Engine) {
 		venueRoutes.GET("/:venueId", GetVenue)
 		venueRoutes.PUT("/:venueId", UpdateVenue)
 		venueRoutes.DELETE("/:venueId", DeleteVenue)
+
+		venueMenuRoutes := venueRoutes.Group("/:venueId/menu")
+		{
+			venueMenuRoutes.POST("/", CreateMenuV2)
+			venueMenuRoutes.GET("/:menuId", GetMenuV2)
+			venueMenuRoutes.PUT("/:menuId", UpdateMenuV2)
+			venueMenuRoutes.DELETE("/:menuId", DeleteMenuV2)
+		}
+
+		venueMenuItemRoutes := venueRoutes.Group("/:venueId/menu/:menuId/items")
+		{
+			venueMenuItemRoutes.POST("/", CreateMenuItemV2)
+			venueMenuItemRoutes.GET("/", GetAllMenuItemsV2)
+			venueMenuItemRoutes.GET("/:itemId", GetMenuItemV2)
+			venueMenuItemRoutes.PUT("/:itemId", UpdateMenuItemV2)
+			venueMenuItemRoutes.DELETE("/:itemId", DeleteMenuItemV2)
+		}
 	}
 
 	userRoutes := r.Group("/users")

@@ -14,14 +14,14 @@ type Venue struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name     string             `bson:"name" json:"name"`
 	Location Location           `bson:"location" json:"location"`
-	Menu     MenuV2             `bson:"menus" json:"menus"`
+	MenuID   primitive.ObjectID `bson:"menu_id" json:"menu_id"`
 }
 
 type MenuV2 struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Items     []MenuItemV2       `bson:"items" json:"items"`
-	BannerURL string             `bson:"banner_url" json:"banner_url"`
-	Location  string             `bson:"location" json:"location"`
+	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	VenueID primitive.ObjectID `bson:"venue_id" json:"venue_id"`
+	Items   []MenuItemV2       `bson:"items" json:"items"`
+	// BannerURL string             `bson:"banner_url" json:"banner_url"`
 }
 
 type UserV2 struct {

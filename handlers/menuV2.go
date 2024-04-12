@@ -15,33 +15,57 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const CollectionNameMenuV2 = "menuV2"
+const CollectionNameMenuV2 = "menusV2"
 
-// CreateMenu creates a new menu in the database
 func CreateMenuV2(c *gin.Context) {
 	log.Println("CreateMenu V2")
 
-	var menu models.MenuV2
+	venueID := c.Param("venueId") // Assuming the venue ID is passed as a URL parameter
 
+	var menu models.MenuV2
 	if err := c.ShouldBindJSON(&menu); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Println(menu)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	// Convert venueID from string to primitive.ObjectID
+	objID, err := primitive.ObjectIDFromHex(venueID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu ID format"})
+		return
+	}
+
+	log.Println(objID)
+
+	// Generate a new ObjectID for the menu item
+	menu.ID = primitive.NewObjectID()
 
 	if menu.Items == nil {
 		menu.Items = []models.MenuItemV2{}
 	}
 
-	result, err := db.DB.Collection(CollectionNameMenuV2).InsertOne(ctx, menu)
+	result, err := db.DB.Collection("menusV2").InsertOne(ctx, menu)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	log.Println(result.InsertedID)
+
+	// Store the menu ID in the venue's menu ID field
+	venueUpdate := bson.M{"$set": bson.M{"menu_id": menu.ID}}
+	_, err = db.DB.Collection("venues").UpdateOne(ctx, bson.M{"_id": objID}, venueUpdate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, menu)
 }
 
 // UpdateMenu updates an existing menu in the database

@@ -21,6 +21,7 @@ type MenuV2 struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	VenueID primitive.ObjectID `bson:"venue_id" json:"venue_id"`
 	Items   []MenuItemV2       `bson:"items" json:"items"`
+	ProfileIconURL string			`bson:"profile_icon_url" json:"profile_icon_url"`
 	// BannerURL string             `bson:"banner_url" json:"banner_url"`
 }
 

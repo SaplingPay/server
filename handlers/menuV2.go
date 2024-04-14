@@ -58,7 +58,7 @@ func CreateMenuV2(c *gin.Context) {
 	log.Println(result.InsertedID)
 
 	// Store the menu ID in the venue's menu ID field
-	venueUpdate := bson.M{"$set": bson.M{"menu_id": menu.ID}}
+	venueUpdate := bson.M{"$push": bson.M{"menu_ids": menu.ID}}
 	_, err = db.DB.Collection("venues").UpdateOne(ctx, bson.M{"_id": objID}, venueUpdate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

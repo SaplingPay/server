@@ -266,7 +266,10 @@ func ParseMenuCard(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 	}
 
-	repositories.AddAllMenuItems(menuId, menuItems)
+	items, err := repositories.AddAllMenuItems(menuId, menuItems)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
 
-	c.Data(http.StatusOK, gin.MIMEJSON, resultBytes)
+	c.JSON(http.StatusOK, items)
 }

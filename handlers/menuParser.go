@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"github.com/SaplingPay/server/models"
+	"github.com/SaplingPay/server/repositories"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	"log"
 	"net/http"
@@ -22,20 +26,18 @@ const instructions = `
 		The returned message should be just a JSON object, in a valid text/json format.
 		There's no need for any text, explanation, markdown, or anything else besides the JSON.
 		The return format should be JSON, and should be in the following format:
-		{	
-			"categories": [
-				{	
-					"name": "Appetizers",	
-					"items": [	
-						{		
-							"name": "Spring Rolls",	
-							"description": "Crispy spring rolls filled with vegetables",					
-							"price": 5.99
-						}
-					]
-				}
-			]
-		}
+		[
+			{
+				  "name": "Veggie Pizza",
+				  "price": 15.99,
+				  "categories": ["Vegetarian", "Pizza", "Main Course"]
+			},
+			{
+				  "name": "Pepperoni Pizza",
+				  "price": 18.99,
+				  "categories": ["Pizza", "Main Course"]
+			}
+		]
 	`
 
 func uploadFile(client *openai.Client, r io.Reader) (string, error) {
@@ -228,8 +230,10 @@ func ParseMenuCard(c *gin.Context) {
 	file, _ := c.FormFile("menu")
 	openFile, _ := file.Open()
 
-	log.Println(file.Header)
-	log.Println(file.Filename)
+	menuIdStr := c.Param("menuId")
+
+	log.Println(loggerTag, file.Header)
+	log.Println(loggerTag, file.Filename)
 
 	contentType := file.Header.Get("Content-Type")
 	if contentType != "application/pdf" && contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/webp" {
@@ -250,6 +254,19 @@ func ParseMenuCard(c *gin.Context) {
 	result = strings.ReplaceAll(result, "```", "")
 	resultBytes := []byte(result)
 	openFile.Close()
+
+	var menuItems []models.MenuItemV2
+	if err := json.Unmarshal(resultBytes, &menuItems); err != nil {
+		log.Println(loggerTag, err)
+		c.JSON(http.StatusInternalServerError, err)
+	}
+
+	menuId, err := primitive.ObjectIDFromHex(menuIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+	repositories.AddAllMenuItems(menuId, menuItems)
 
 	c.Data(http.StatusOK, gin.MIMEJSON, resultBytes)
 }

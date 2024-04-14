@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/SaplingPay/server/repositories"
 	"log"
 	"net/http"
 	"reflect"
@@ -27,26 +28,18 @@ func CreateMenuItemV2(c *gin.Context) {
 		return
 	}
 
-	log.Println(menuItem)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	// Convert menuID from string to primitive.ObjectID
-	objID, err := primitive.ObjectIDFromHex(menuID)
+	objMenuID, err := primitive.ObjectIDFromHex(menuID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu ID format"})
 		return
 	}
 
-	log.Println(objID)
-
 	// Generate a new ObjectID for the menu item
 	menuItem.ID = primitive.NewObjectID()
 
-	// Add the new menu item to the menu document
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$push": bson.M{"items": menuItem}}
-	_, err = db.DB.Collection(CollectionNameMenuV2).UpdateOne(ctx, filter, update)
+	repositories.AddMenuItem(objMenuID, menuItem)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

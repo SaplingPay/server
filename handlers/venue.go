@@ -28,6 +28,8 @@ func CreateVenue(c *gin.Context) {
 		return
 	}
 
+	venue.MenuIDs = []primitive.ObjectID{}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -38,28 +40,6 @@ func CreateVenue(c *gin.Context) {
 	}
 
 	log.Println("Venue created:", result.InsertedID)
-
-	var menu models.MenuV2
-	menu.VenueID = result.InsertedID.(primitive.ObjectID)
-	menu.Items = []models.MenuItemV2{}
-
-	resultMenu, err := db.DB.Collection("menusV2").InsertOne(ctx, menu)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	log.Println("Menu created:", resultMenu.InsertedID)
-
-	// Store the menu ID in the venue's menu ID field
-	venueUpdate := bson.M{"$set": bson.M{"menu_id": resultMenu.InsertedID}}
-	resultUpdated, err := db.DB.Collection("venues").UpdateOne(ctx, bson.M{"_id": result.InsertedID}, venueUpdate)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	log.Println("Venue updated:", resultUpdated.UpsertedID)
 
 	c.JSON(http.StatusOK, result)
 }

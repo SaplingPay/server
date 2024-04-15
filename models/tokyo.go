@@ -11,11 +11,12 @@ type Location struct {
 }
 
 type Venue struct {
-	ID       primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
-	Name     string               `bson:"name" json:"name"`
-	Location Location             `bson:"location" json:"location"`
-	MenuID   primitive.ObjectID   `bson:"menu_id" json:"menu_id"`
-	MenuIDs  []primitive.ObjectID `bson:"menu_ids" json:"menu_ids"`
+	ID            primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	Name          string               `bson:"name" json:"name"`
+	Location      Location             `bson:"location" json:"location"`
+	MenuID        primitive.ObjectID   `bson:"menu_id" json:"menu_id"`
+	MenuIDs       []primitive.ObjectID `bson:"menu_ids" json:"menu_ids"`
+	ProfilePicURL string               `bson:"profile_pic_url" json:"profile_pic_url"`
 }
 
 type MenuV2 struct {
@@ -23,7 +24,7 @@ type MenuV2 struct {
 	Name    string             `bson:"name" json:"name"`
 	VenueID primitive.ObjectID `bson:"venue_id" json:"venue_id"`
 	Items   []MenuItemV2       `bson:"items" json:"items"`
-	ProfileIconURL string			`bson:"profile_icon_url" json:"profile_icon_url"`
+	// ProfileIconURL string			`bson:"profile_icon_url" json:"profile_icon_url"`
 	// BannerURL string             `bson:"banner_url" json:"banner_url"`
 }
 

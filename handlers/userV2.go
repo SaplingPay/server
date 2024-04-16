@@ -150,3 +150,39 @@ func GetAllUsersV2(c *gin.Context) {
 
 	c.JSON(http.StatusOK, users)
 }
+
+func FollowUser(c *gin.Context) {
+	log.Println("Follow")
+
+	userID := c.Param("userId")
+	followingID := c.Param("followingId")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	followingObjID, err := primitive.ObjectIDFromHex(followingID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$addToSet": bson.M{"following": followingObjID.Hex()}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": followingObjID}, bson.M{"$addToSet": bson.M{"followers": objID.Hex()}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User followed successfully"})
+}

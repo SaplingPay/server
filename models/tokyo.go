@@ -31,21 +31,24 @@ type MenuV2 struct {
 }
 
 type Save struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	VenueID primitive.ObjectID `bson:"venue_id" json:"venue_id"`
+	Type       string             `bson:"type" json:"type"`
+	VenueID    primitive.ObjectID `bson:"venue_id" json:"venue_id"`
+	MenuID     primitive.ObjectID `bson:"menu_id" json:"menu_id"`
+	MenuItemID primitive.ObjectID `bson:"menu_item_id" json:"menu_item_id"`
 	// ADD Collections feature / field
 }
 
 type UserV2 struct {
-	ID          primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
-	UserID      string               `bson:"user_id" json:"user_id"`
-	DisplayName string               `bson:"display_name" json:"display_name"`
-	Username    string               `bson:"username" json:"username"`
-	Email       string               `bson:"email" json:"email"`
-	Location    Location             `bson:"location" json:"location"`
-	Saves       []Save               `bson:"saves" json:"saves"`
-	Followers   []primitive.ObjectID `bson:"followers" json:"followers"`
-	Following   []primitive.ObjectID `bson:"following" json:"following"`
+	ID            primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	UserID        string               `bson:"user_id" json:"user_id"`
+	DisplayName   string               `bson:"display_name" json:"display_name"`
+	Username      string               `bson:"username" json:"username"`
+	Email         string               `bson:"email" json:"email"`
+	ProfilePicURL string               `bson:"profile_pic_url" json:"profile_pic_url"`
+	Location      Location             `bson:"location" json:"location"`
+	Saves         []Save               `bson:"saves" json:"saves"`
+	Followers     []primitive.ObjectID `bson:"followers" json:"followers"`
+	Following     []primitive.ObjectID `bson:"following" json:"following"`
 }
 
 type MenuItemV2 struct {

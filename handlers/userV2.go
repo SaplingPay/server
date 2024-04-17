@@ -218,5 +218,53 @@ func FollowUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User followed successfully"})
+	var updatedUser models.UserV2
+	err = db.DB.Collection(CollectionNameUserV2).FindOne(ctx, bson.M{"_id": followingObjID}).Decode(&updatedUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve updated user"})
+		return
+	}
+	c.JSON(http.StatusOK, updatedUser)
+}
+
+func UnFollowUser(c *gin.Context) {
+	log.Println("UnFollow")
+
+	userID := c.Param("userId")
+	followingID := c.Param("followingId")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	followingObjID, err := primitive.ObjectIDFromHex(followingID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$pull": bson.M{"following": followingObjID.Hex()}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": followingObjID}, bson.M{"$pull": bson.M{"followers": objID.Hex()}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var updatedUser models.UserV2
+	err = db.DB.Collection(CollectionNameUserV2).FindOne(ctx, bson.M{"_id": followingObjID}).Decode(&updatedUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve updated user"})
+		return
+	}
+	c.JSON(http.StatusOK, updatedUser)
 }

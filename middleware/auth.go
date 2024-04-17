@@ -24,6 +24,7 @@ type Claims struct {
 func GetToken(c *gin.Context) {
 	token, err := GenerateJWT()
 	if err != nil {
+		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
 	}

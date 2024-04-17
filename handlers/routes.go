@@ -11,7 +11,7 @@ import (
 
 func SetUpRoutes(r *gin.Engine) {
 	// Set up the routes that require authentication
-	// SetUpAuthRoutes(r)
+	//SetUpAuthRoutes(r)
 
 	r.POST("/getToken", middleware.GetToken)
 
@@ -70,6 +70,7 @@ func SetUpRoutes(r *gin.Engine) {
 			venueMenuRoutes.GET("/:menuId", GetMenuV2)
 			venueMenuRoutes.PUT("/:menuId", UpdateMenuV2)
 			venueMenuRoutes.DELETE("/:menuId", DeleteMenuV2)
+			venueMenuRoutes.POST("/parse/:menuId", ParseMenuCard)
 		}
 
 		venueMenuItemRoutes := venueRoutes.Group("/:venueId/menu/:menuId/items")

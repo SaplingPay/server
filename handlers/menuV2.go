@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/SaplingPay/server/repositories"
 	"log"
 	"net/http"
 	"reflect"
@@ -30,8 +31,6 @@ func CreateMenuV2(c *gin.Context) {
 	}
 
 	log.Println(menu)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	// Convert venueID from string to primitive.ObjectID
 	objID, err := primitive.ObjectIDFromHex(venueID)
@@ -49,23 +48,16 @@ func CreateMenuV2(c *gin.Context) {
 		menu.Items = []models.MenuItemV2{}
 	}
 
-	result, err := db.DB.Collection("menusV2").InsertOne(ctx, menu)
+	menu.VenueID = objID
+
+	savedMenu, err := repositories.CreateMenu(menu)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Println(result.InsertedID)
-
-	// Store the menu ID in the venue's menu ID field
-	venueUpdate := bson.M{"$push": bson.M{"menu_ids": menu.ID}}
-	_, err = db.DB.Collection("venues").UpdateOne(ctx, bson.M{"_id": objID}, venueUpdate)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, menu)
+	c.JSON(http.StatusOK, savedMenu)
 }
 
 // UpdateMenu updates an existing menu in the database

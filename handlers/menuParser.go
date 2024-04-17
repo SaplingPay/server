@@ -235,10 +235,16 @@ func parseImageUsingGPT4Vision(r io.Reader) (string, error) {
 }
 
 func ParseMenuCard(c *gin.Context) {
+	var err error
 	file, _ := c.FormFile("menu")
 	openFile, _ := file.Open()
 
-	menuIdStr := c.Param("menuId")
+	venueIDStr := c.Param("venueId")
+
+	venueID, err := primitive.ObjectIDFromHex(venueIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
 
 	log.Println(loggerTag, file.Header)
 	log.Println(loggerTag, file.Filename)
@@ -250,7 +256,6 @@ func ParseMenuCard(c *gin.Context) {
 	}
 
 	var result string
-	var err error
 	if contentType == "application/pdf" {
 		r, e := parseFileUsingGPTAssistant(openFile)
 		result = r
@@ -276,15 +281,18 @@ func ParseMenuCard(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 	}
 
-	menuId, err := primitive.ObjectIDFromHex(menuIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+	menu := models.MenuV2{
+		VenueID: venueID,
+		ID:      primitive.NewObjectID(),
+		Items:   menuItems,
+		Name:    "Parsed Menu from " + time.Now().Format("01-02-2006 15:04:05"),
 	}
 
-	items, err := repositories.AddAllMenuItems(menuId, menuItems)
+	menu, err = repositories.CreateMenu(menu)
+
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, menu)
 }

@@ -43,3 +43,20 @@ func AddAllMenuItems(menuId primitive.ObjectID, items []models.MenuItemV2) ([]mo
 
 	return items, err
 }
+
+func CreateMenu(menu models.MenuV2) (models.MenuV2, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	result, err := db.DB.Collection("menusV2").InsertOne(ctx, menu)
+	if err != nil {
+		return models.MenuV2{}, err
+	}
+
+	log.Println(result.InsertedID)
+
+	venueUpdate := bson.M{"$push": bson.M{"menu_ids": menu.ID}}
+	_, err = db.DB.Collection("venues").UpdateOne(ctx, bson.M{"_id": menu.VenueID}, venueUpdate)
+
+	return menu, err
+}

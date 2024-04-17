@@ -67,10 +67,10 @@ func SetUpRoutes(r *gin.Engine) {
 		venueMenuRoutes := venueRoutes.Group("/:venueId/menu")
 		{
 			venueMenuRoutes.POST("/", CreateMenuV2)
+			venueMenuRoutes.POST("/parse/", ParseMenuCard)
 			venueMenuRoutes.GET("/:menuId", GetMenuV2)
 			venueMenuRoutes.PUT("/:menuId", UpdateMenuV2)
 			venueMenuRoutes.DELETE("/:menuId", DeleteMenuV2)
-			venueMenuRoutes.POST("/parse/:menuId", ParseMenuCard)
 		}
 
 		venueMenuItemRoutes := venueRoutes.Group("/:venueId/menu/:menuId/items")

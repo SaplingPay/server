@@ -33,7 +33,7 @@ func AddAllMenuItems(menuId primitive.ObjectID, items []models.MenuItemV2) ([]mo
 	defer cancel()
 
 	// Set all object ids
-	for idx, _ := range items {
+	for idx := range items {
 		items[idx].ID = primitive.NewObjectID()
 	}
 

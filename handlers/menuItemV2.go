@@ -38,7 +38,7 @@ func CreateMenuItemV2(c *gin.Context) {
 	// Generate a new ObjectID for the menu item
 	menuItem.ID = primitive.NewObjectID()
 
-	repositories.AddMenuItem(objMenuID, menuItem)
+	_, err = repositories.AddMenuItem(objMenuID, menuItem)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

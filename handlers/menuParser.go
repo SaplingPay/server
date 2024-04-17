@@ -43,7 +43,11 @@ const instructions = `
 func uploadFile(client *openai.Client, r io.Reader) (string, error) {
 	log.Println(loggerTag, "Uploading file")
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(r)
+	_, err := buf.ReadFrom(r)
+
+	if err != nil {
+		return "", err
+	}
 
 	file, err := client.CreateFileBytes(context.Background(), openai.FileBytesRequest{
 		Name:    "menu.pdf",
@@ -127,15 +131,15 @@ func getResult(client *openai.Client, threadId string) (string, error) {
 func cleanup(client *openai.Client, assistantId string, fileId string, threadId string) {
 	log.Println(loggerTag, "Cleaning up")
 	if threadId != "" {
-		client.DeleteThread(context.Background(), threadId)
+		_, _ = client.DeleteThread(context.Background(), threadId)
 	}
 
 	if assistantId != "" {
-		client.DeleteAssistant(context.Background(), assistantId)
+		_, _ = client.DeleteAssistant(context.Background(), assistantId)
 	}
 
 	if fileId != "" {
-		client.DeleteFile(context.Background(), fileId)
+		_ = client.DeleteFile(context.Background(), fileId)
 	}
 }
 
@@ -186,7 +190,11 @@ func parseImageUsingGPT4Vision(r io.Reader) (string, error) {
 	client := openai.NewClient(apiKey)
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(r)
+	_, err := buf.ReadFrom(r)
+
+	if err != nil {
+		return "", err
+	}
 
 	imgBase64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
@@ -242,12 +250,19 @@ func ParseMenuCard(c *gin.Context) {
 	}
 
 	var result string
+	var err error
 	if contentType == "application/pdf" {
-		r, _ := parseFileUsingGPTAssistant(openFile)
+		r, e := parseFileUsingGPTAssistant(openFile)
 		result = r
+		err = e
 	} else {
-		r, _ := parseImageUsingGPT4Vision(openFile)
+		r, e := parseImageUsingGPT4Vision(openFile)
 		result = r
+		err = e
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
 	}
 
 	result = strings.ReplaceAll(result, "```json", "")

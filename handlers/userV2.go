@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/SaplingPay/server/db"
@@ -14,13 +15,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const CollectionNameUserV2 = "userV2"
+const CollectionNameUserV2 = "usersV2"
 
 // CreateUserV2 creates a new user in the database
 func CreateUserV2(c *gin.Context) {
 	log.Println("CreateUser V2")
 
 	var user models.UserV2
+
+	// init
+	user.Followers = []primitive.ObjectID{}
+	user.Following = []primitive.ObjectID{}
+	user.Saves = []models.Save{}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -60,7 +66,27 @@ func UpdateUserV2(c *gin.Context) {
 		return
 	}
 
-	result, err := db.DB.Collection(CollectionNameUserV2).ReplaceOne(ctx, bson.M{"_id": objID}, user)
+	// Prepare the update document similarly to before
+	update := bson.M{}
+	userType := reflect.TypeOf(user)
+	userValue := reflect.ValueOf(user)
+	for i := 0; i < userType.NumField(); i++ {
+		field := userType.Field(i)
+		fieldValue := userValue.Field(i).Interface()
+		fieldType := field.Type.Kind()
+
+		if fieldType == reflect.Bool || !reflect.DeepEqual(fieldValue, reflect.Zero(field.Type).Interface()) {
+			bsonTag := field.Tag.Get("bson")
+			// Skip if bson tag is not set or is "-"
+			if bsonTag == "" || bsonTag == "-" {
+				continue
+			}
+
+			update[field.Tag.Get("bson")] = fieldValue
+		}
+	}
+
+	result, err := db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,7 +97,15 @@ func UpdateUserV2(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	// Retrieve the updated user from the database
+	var updatedUser models.UserV2
+	err = db.DB.Collection(CollectionNameUserV2).FindOne(ctx, bson.M{"_id": objID}).Decode(&updatedUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve updated user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedUser)
 }
 
 // DeleteUserV2 deletes a user from the database
@@ -109,7 +143,7 @@ func GetUserV2(c *gin.Context) {
 
 	log.Println("userID", userID)
 	var user models.UserV2
-	if err := db.DB.Collection(CollectionNameUserV2).FindOne(ctx, bson.M{"id": userID}).Decode(&user); err != nil {
+	if err := db.DB.Collection(CollectionNameUserV2).FindOne(ctx, bson.M{"user_id": userID}).Decode(&user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			log.Println("user not found")
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
@@ -149,4 +183,40 @@ func GetAllUsersV2(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, users)
+}
+
+func FollowUser(c *gin.Context) {
+	log.Println("Follow")
+
+	userID := c.Param("userId")
+	followingID := c.Param("followingId")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	followingObjID, err := primitive.ObjectIDFromHex(followingID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$addToSet": bson.M{"following": followingObjID.Hex()}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": followingObjID}, bson.M{"$addToSet": bson.M{"followers": objID.Hex()}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User followed successfully"})
 }

@@ -98,6 +98,7 @@ func SetUpRoutes(r *gin.Engine) {
 		userV2Routes.GET("/:userId", GetUserV2)
 		userV2Routes.PUT("/:userId", UpdateUserV2)
 		userV2Routes.DELETE("/:userId", DeleteUserV2)
+		userV2Routes.PUT("/follow/:userId/:followingId", FollowUser)
 	}
 
 	r.GET("/GetMenusByUserID/:userId", GetMenuByUserID)

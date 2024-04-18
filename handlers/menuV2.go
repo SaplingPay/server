@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"context"
-	"github.com/SaplingPay/server/repositories"
 	"log"
 	"net/http"
 	"reflect"
 	"time"
+
+	"github.com/SaplingPay/server/repositories"
 
 	"github.com/SaplingPay/server/db"
 	"github.com/SaplingPay/server/models"
@@ -185,6 +186,40 @@ func GetAllMenusV2(c *gin.Context) {
 
 	var menus []models.MenuV2
 	cursor, err := db.DB.Collection(CollectionNameMenuV2).Find(ctx, bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var menu models.MenuV2
+		if err := cursor.Decode(&menu); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		menus = append(menus, menu)
+	}
+
+	c.JSON(http.StatusOK, menus)
+}
+
+// Get All Menus for a Venue
+func GetMenusByVenueID(c *gin.Context) {
+	log.Println("GetAllMenusForVenue V2")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	venueID := c.Param("venueId")
+	objID, err := primitive.ObjectIDFromHex(venueID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	var menus []models.MenuV2
+	cursor, err := db.DB.Collection(CollectionNameMenuV2).Find(ctx, bson.M{"venue_id": objID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

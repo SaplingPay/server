@@ -38,6 +38,17 @@ type Save struct {
 	// ADD Collections feature / field
 }
 
+type UserSavesResponse struct {
+	Type          string             `bson:"type" json:"type"`
+	VenueID       primitive.ObjectID `bson:"venue_id" json:"venue_id"`
+	MenuID        primitive.ObjectID `bson:"menu_id" json:"menu_id"`
+	MenuItemID    primitive.ObjectID `bson:"menu_item_id" json:"menu_item_id"`
+	Name          string             `bson:"name" json:"name"`
+	VenueName     string             `bson:"venue_name" json:"venue_name"`
+	ProfilePicURL string             `bson:"profile_pic_url" json:"profile_pic_url"`
+	Location      Location           `bson:"location" json:"location"`
+}
+
 type UserV2 struct {
 	ID            primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
 	UserID        string               `bson:"user_id" json:"user_id"`

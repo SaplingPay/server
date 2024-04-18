@@ -110,6 +110,8 @@ func SetUpRoutes(r *gin.Engine) {
 	}
 
 	r.GET("/GetMenusByUserID/:userId", GetMenuByUserID)
+
+	r.GET("/GetSignedURL/:menuId", GetSignedURL)
 }
 
 // func setup auth group

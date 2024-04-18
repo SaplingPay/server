@@ -72,6 +72,11 @@ func SetUpRoutes(r *gin.Engine) {
 			venueMenuRoutes.PUT("/:menuId", UpdateMenuV2)
 			venueMenuRoutes.DELETE("/:menuId", DeleteMenuV2)
 		}
+		// get all menus for a venue
+		venueMenusRoutes := venueRoutes.Group("/:venueId/menus")
+		{
+			venueMenusRoutes.GET("/", GetMenusByVenueID)
+		}
 
 		venueMenuItemRoutes := venueRoutes.Group("/:venueId/menu/:menuId/items")
 		{
@@ -90,6 +95,7 @@ func SetUpRoutes(r *gin.Engine) {
 		userRoutes.GET("/:userId", GetUser)
 		userRoutes.PUT("/:userId", UpdateUser)
 		userRoutes.DELETE("/:userId", DeleteUser)
+		userRoutes.GET("/:userId/saves", GetUserSaves)
 	}
 
 	userV2Routes := r.Group("/usersV2")

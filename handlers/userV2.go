@@ -268,3 +268,84 @@ func UnFollowUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, updatedUser)
 }
+
+// GetUserSaves retrieves all saves for a user
+func GetUserSaves(c *gin.Context) {
+	log.Println("GetUserSaves")
+
+	userID := c.Param("userId")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+		return
+	}
+
+	var user models.UserV2
+	err = db.DB.Collection(CollectionNameUserV2).FindOne(ctx, bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var userSaves []models.UserSavesResponse
+	for _, save := range user.Saves {
+
+		var userSave models.UserSavesResponse
+		if save.Type == "venue" {
+			var venue models.Venue
+			err = db.DB.Collection("venues").FindOne(ctx, bson.M{"_id": save.VenueID}).Decode(&venue)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve venue"})
+				return
+			}
+
+			userSave.Type = save.Type
+			userSave.VenueID = save.VenueID
+			userSave.MenuID = save.MenuID
+			userSave.MenuItemID = save.MenuItemID
+			userSave.Name = venue.Name
+			userSave.VenueName = venue.Name
+			userSave.ProfilePicURL = venue.ProfilePicURL
+			userSave.Location = venue.Location
+		} else if save.Type == "menu_item" {
+			var menu models.MenuV2
+			err = db.DB.Collection("menusV2").FindOne(ctx, bson.M{"_id": save.MenuID}).Decode(&menu)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve menu"})
+				return
+			}
+
+			var venue models.Venue
+			err = db.DB.Collection("venues").FindOne(ctx, bson.M{"_id": menu.VenueID}).Decode(&venue)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve venue"})
+				return
+			}
+
+			var menuItem models.MenuItemV2
+			for _, item := range menu.Items {
+				if item.ID == save.MenuItemID {
+					menuItem = item
+					break
+				}
+			}
+
+			userSave.Type = save.Type
+			userSave.VenueID = save.VenueID
+			userSave.MenuID = save.MenuID
+			userSave.MenuItemID = save.MenuItemID
+			userSave.Name = menuItem.Name
+			userSave.VenueName = venue.Name
+			userSave.ProfilePicURL = venue.ProfilePicURL
+			userSave.Location = venue.Location
+		}
+
+		userSaves = append(userSaves, userSave)
+	}
+
+	c.JSON(http.StatusOK, userSaves)
+}

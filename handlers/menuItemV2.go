@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"context"
-	"github.com/SaplingPay/server/repositories"
 	"log"
 	"net/http"
 	"reflect"
 	"time"
+
+	"github.com/SaplingPay/server/repositories"
 
 	"github.com/SaplingPay/server/db"
 	"github.com/SaplingPay/server/models"
@@ -159,39 +160,67 @@ func UpdateMenuItemV2(c *gin.Context) {
 	c.JSON(http.StatusOK, menuItem)
 }
 
-func DeleteMenuItemV2(c *gin.Context) {
-	log.Println("DeleteMenuItem V2")
+// func HardDeleteMenuItemV2(c *gin.Context) {
+// 	log.Println("DeleteMenuItem V2")
 
+// 	menuID := c.Param("menuId")
+// 	menuItemID := c.Param("itemId")
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	// Convert menuID from string to primitive.ObjectID
+// 	objMenuID, err := primitive.ObjectIDFromHex(menuID)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu ID format"})
+// 		return
+// 	}
+
+// 	// Convert menuItemID from string to primitive.ObjectID for matching in array
+// 	objMenuItemID, err := primitive.ObjectIDFromHex(menuItemID)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu item ID format"})
+// 		return
+// 	}
+
+// 	// Remove the specified menu item from the menu document
+// 	filter := bson.M{"_id": objMenuID}
+// 	update := bson.M{"$pull": bson.M{"items": bson.M{"_id": objMenuItemID}}}
+// 	_, err = db.DB.Collection(CollectionNameMenuV2).UpdateOne(ctx, filter, update)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Menu item deleted successfully"})
+// }
+
+func SoftDeleteMenuItemV2(c *gin.Context) {
+	log.Println("SoftDeleteMenuItem V2")
 	menuID := c.Param("menuId")
 	menuItemID := c.Param("itemId")
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	// Convert menuID from string to primitive.ObjectID
 	objMenuID, err := primitive.ObjectIDFromHex(menuID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu ID format"})
 		return
 	}
-
-	// Convert menuItemID from string to primitive.ObjectID for matching in array
 	objMenuItemID, err := primitive.ObjectIDFromHex(menuItemID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid menu item ID format"})
 		return
 	}
-
-	// Remove the specified menu item from the menu document
-	filter := bson.M{"_id": objMenuID}
-	update := bson.M{"$pull": bson.M{"items": bson.M{"_id": objMenuItemID}}}
+	update := bson.M{
+		"$set": bson.M{"items.$.deleted_at": primitive.NewDateTimeFromTime(time.Now())},
+	}
+	filter := bson.M{"_id": objMenuID, "items._id": objMenuItemID}
 	_, err = db.DB.Collection(CollectionNameMenuV2).UpdateOne(ctx, filter, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Menu item deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Menu item soft deleted"})
 }
 
 func GetAllMenuItemsV2(c *gin.Context) {

@@ -103,16 +103,40 @@ func UpdateVenue(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedVenue)
 }
 
-// DeleteVenue deletes a venue from the database
-func DeleteVenue(c *gin.Context) {
-	log.Println("DeleteVenue")
+// HardDeleteVenue deletes a venue from the database
+// func HardDeleteVenue(c *gin.Context) {
+// 	log.Println("DeleteVenue")
 
+// 	// Fetching the venue ID from the URL parameter
+// 	venueID := c.Param("venueId")
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	// Assuming `venueID` needs to be converted to an ObjectID if you're using MongoDB's default ObjectID
+// 	// If your ID is a string in the database, you can directly use venueID in the filter
+// 	objID, err := primitive.ObjectIDFromHex(venueID)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+// 		return
+// 	}
+
+// 	_, err = db.DB.Collection(CollectionNameVenue).DeleteOne(ctx, bson.M{"_id": objID})
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Venue deleted successfully"})
+// }
+
+// SoftDeleteVenue soft deletes a venue from the database
+func SoftDeleteVenue(c *gin.Context) {
+	log.Println("SoftDeleteVenue")
 	// Fetching the venue ID from the URL parameter
 	venueID := c.Param("venueId")
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
 	// Assuming `venueID` needs to be converted to an ObjectID if you're using MongoDB's default ObjectID
 	// If your ID is a string in the database, you can directly use venueID in the filter
 	objID, err := primitive.ObjectIDFromHex(venueID)
@@ -120,14 +144,15 @@ func DeleteVenue(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
 		return
 	}
-
-	_, err = db.DB.Collection(CollectionNameVenue).DeleteOne(ctx, bson.M{"_id": objID})
+	update := bson.M{
+		"$set": bson.M{"deleted_at": primitive.NewDateTimeFromTime(time.Now())},
+	}
+	_, err = db.DB.Collection(CollectionNameVenue).UpdateOne(ctx, bson.M{"_id": objID}, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Venue deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Venue soft deleted"})
 }
 
 // GetVenue retrieves a single venue from the database

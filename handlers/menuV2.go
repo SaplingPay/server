@@ -120,16 +120,40 @@ func UpdateMenuV2(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedMenu)
 }
 
-// DeleteMenu deletes a menu from the database
-func DeleteMenuV2(c *gin.Context) {
-	log.Println("DeleteMenu V2")
+// HardDeleteMenu deletes a menu from the database
+// func HardDeleteMenuV2(c *gin.Context) {
+// 	log.Println("DeleteMenu V2")
 
+// 	// Fetching the menu ID from the URL parameter
+// 	menuID := c.Param("menuId")
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	// Assuming `menuID` needs to be converted to an ObjectID if you're using MongoDB's default ObjectID
+// 	// If your ID is a string in the database, you can directly use menuID in the filter
+// 	objID, err := primitive.ObjectIDFromHex(menuID)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+// 		return
+// 	}
+
+// 	_, err = db.DB.Collection(CollectionNameMenuV2).DeleteOne(ctx, bson.M{"_id": objID})
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Menu deleted successfully"})
+// }
+
+// SoftDeleteMenu soft deletes a menu from the database
+func SoftDeleteMenuV2(c *gin.Context) {
+	log.Println("SoftDeleteMenu V2")
 	// Fetching the menu ID from the URL parameter
 	menuID := c.Param("menuId")
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
 	// Assuming `menuID` needs to be converted to an ObjectID if you're using MongoDB's default ObjectID
 	// If your ID is a string in the database, you can directly use menuID in the filter
 	objID, err := primitive.ObjectIDFromHex(menuID)
@@ -137,14 +161,15 @@ func DeleteMenuV2(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
 		return
 	}
-
-	_, err = db.DB.Collection(CollectionNameMenuV2).DeleteOne(ctx, bson.M{"_id": objID})
+	update := bson.M{
+		"$set": bson.M{"deleted_at": primitive.NewDateTimeFromTime(time.Now())},
+	}
+	_, err = db.DB.Collection(CollectionNameMenuV2).UpdateOne(ctx, bson.M{"_id": objID}, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Menu deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Menu soft deleted"})
 }
 
 // GetMenu retrieves a single menu from the database

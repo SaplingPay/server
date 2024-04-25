@@ -38,31 +38,13 @@ func SetUpRoutes(r *gin.Engine) {
 		}
 	}
 
-	// menuRoutesV2 := r.Group("/menusV2")
-	// {
-	// 	menuRoutesV2.GET("/", GetAllMenusV2)
-	// 	menuRoutesV2.POST("/:venueId", CreateMenuV2)
-	// 	menuRoutesV2.GET("/:menuId", GetMenuV2)
-	// 	menuRoutesV2.PUT("/:menuId", UpdateMenuV2)
-	// 	menuRoutesV2.DELETE("/:menuId", DeleteMenuV2)
-
-	// menuItemRoutesV2 := menuRoutesV2.Group("/:menuId/items")
-	// {
-	// 	menuItemRoutesV2.POST("/", CreateMenuItemV2)
-	// 	menuItemRoutesV2.GET("/", GetAllMenuItemsV2)
-	// 	menuItemRoutesV2.GET("/:itemId", GetMenuItemV2)
-	// 	menuItemRoutesV2.PUT("/:itemId", UpdateMenuItemV2)
-	// 	menuItemRoutesV2.DELETE("/:itemId", DeleteMenuItemV2)
-	// }
-	// }
-
 	venueRoutes := r.Group("/venues")
 	{
 		venueRoutes.GET("/", GetAllVenues)
 		venueRoutes.POST("/", CreateVenue)
 		venueRoutes.GET("/:venueId", GetVenue)
 		venueRoutes.PUT("/:venueId", UpdateVenue)
-		venueRoutes.DELETE("/:venueId", DeleteVenue)
+		venueRoutes.DELETE("/:venueId", SoftDeleteVenue)
 
 		venueMenuRoutes := venueRoutes.Group("/:venueId/menu")
 		{
@@ -70,7 +52,7 @@ func SetUpRoutes(r *gin.Engine) {
 			venueMenuRoutes.POST("/parse/", ParseMenuCard)
 			venueMenuRoutes.GET("/:menuId", GetMenuV2)
 			venueMenuRoutes.PUT("/:menuId", UpdateMenuV2)
-			venueMenuRoutes.DELETE("/:menuId", DeleteMenuV2)
+			venueMenuRoutes.DELETE("/:menuId", SoftDeleteMenuV2)
 		}
 		// get all menus for a venue
 		venueMenusRoutes := venueRoutes.Group("/:venueId/menus")
@@ -84,7 +66,7 @@ func SetUpRoutes(r *gin.Engine) {
 			venueMenuItemRoutes.GET("/", GetAllMenuItemsV2)
 			venueMenuItemRoutes.GET("/:itemId", GetMenuItemV2)
 			venueMenuItemRoutes.PUT("/:itemId", UpdateMenuItemV2)
-			venueMenuItemRoutes.DELETE("/:itemId", DeleteMenuItemV2)
+			venueMenuItemRoutes.DELETE("/:itemId", SoftDeleteMenuItemV2)
 		}
 	}
 
@@ -104,12 +86,30 @@ func SetUpRoutes(r *gin.Engine) {
 		userV2Routes.GET("/", GetAllUsersV2)
 		userV2Routes.GET("/:userId", GetUserV2)
 		userV2Routes.PUT("/:userId", UpdateUserV2)
-		userV2Routes.DELETE("/:userId", DeleteUserV2)
+		userV2Routes.DELETE("/:userId", SoftDeleteUserV2)
 		userV2Routes.PUT("/:userId/follow/:followingId", FollowUser)
 		userV2Routes.PUT("/:userId/unfollow/:followingId", UnFollowUser)
 	}
 
 	r.GET("/GetMenusByUserID/:userId", GetMenuByUserID)
+
+	orders := r.Group("/orders")
+	{
+		orders.POST("/", CreateOrder)
+		orders.GET("/:id", GetOrder)
+		orders.PUT("/:id", UpdateOrder)
+		orders.DELETE("/:id", SoftDeleteOrder)
+		orders.GET("/", GetAllOrders)
+	}
+
+	payments := r.Group("/payments")
+	{
+		payments.POST("/", CreatePayment)
+		payments.GET("/:id", GetPayment)
+		payments.PUT("/:id", UpdatePayment)
+		payments.DELETE("/:id", SoftDeletePayment)
+		payments.GET("/", GetAllPayments)
+	}
 }
 
 // func setup auth group

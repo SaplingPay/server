@@ -108,28 +108,50 @@ func UpdateUserV2(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedUser)
 }
 
-// DeleteUserV2 deletes a user from the database
-func DeleteUserV2(c *gin.Context) {
-	log.Println("DeleteUser V2")
+// HardDeleteUserV2 deletes a user from the database
+// func HardDeleteUserV2(c *gin.Context) {
+// 	log.Println("DeleteUser V2")
 
+// 	userID := c.Param("userId")
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	objID, err := primitive.ObjectIDFromHex(userID)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
+// 		return
+// 	}
+
+// 	_, err = db.DB.Collection(CollectionNameUserV2).DeleteOne(ctx, bson.M{"_id": objID})
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+// }
+
+// SoftDeleteUserV2 soft deletes a user from the database
+func SoftDeleteUserV2(c *gin.Context) {
+	log.Println("SoftDeleteUser V2")
 	userID := c.Param("userId")
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID format"})
 		return
 	}
-
-	_, err = db.DB.Collection(CollectionNameUserV2).DeleteOne(ctx, bson.M{"_id": objID})
+	update := bson.M{
+		"$set": bson.M{"deleted_at": primitive.NewDateTimeFromTime(time.Now())},
+	}
+	_, err = db.DB.Collection(CollectionNameUserV2).UpdateOne(ctx, bson.M{"_id": objID}, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "User soft deleted"})
 }
 
 // GetUserV2 retrieves a single user from the database

@@ -13,19 +13,22 @@ type Location struct {
 }
 
 type Venue struct {
-	ID            primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
-	Name          string               `bson:"name" json:"name"`
-	Location      Location             `bson:"location" json:"location"`
-	MenuID        primitive.ObjectID   `bson:"menu_id" json:"menu_id"`
-	MenuIDs       []primitive.ObjectID `bson:"menu_ids" json:"menu_ids"`
-	ProfilePicURL string               `bson:"profile_pic_url" json:"profile_pic_url"`
+	ID                primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	Name              string               `bson:"name" json:"name"`
+	Location          Location             `bson:"location" json:"location"`
+	MenuID            primitive.ObjectID   `bson:"menu_id" json:"menu_id"`
+	MenuIDs           []primitive.ObjectID `bson:"menu_ids" json:"menu_ids"`
+	ProfilePicURL     string               `bson:"profile_pic_url" json:"profile_pic_url"`
+	OrderingSupported bool                 `bson:"ordering_supported" json:"ordering_supported"`
+	DeletedAt         *primitive.DateTime  `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
 }
 
 type MenuV2 struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name    string             `bson:"name" json:"name"`
-	VenueID primitive.ObjectID `bson:"venue_id" json:"venue_id"`
-	Items   []MenuItemV2       `bson:"items" json:"items"`
+	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
+	Name      string              `bson:"name" json:"name"`
+	VenueID   primitive.ObjectID  `bson:"venue_id" json:"venue_id"`
+	Items     []MenuItemV2        `bson:"items" json:"items"`
+	DeletedAt *primitive.DateTime `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
 	// ProfileIconURL string			`bson:"profile_icon_url" json:"profile_icon_url"`
 	// BannerURL string             `bson:"banner_url" json:"banner_url"`
 }
@@ -60,12 +63,38 @@ type UserV2 struct {
 	Saves         []Save               `bson:"saves" json:"saves"`
 	Followers     []primitive.ObjectID `bson:"followers" json:"followers"`
 	Following     []primitive.ObjectID `bson:"following" json:"following"`
+	DeletedAt     *primitive.DateTime  `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
 }
 
 type MenuItemV2 struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Name       string             `bson:"name" json:"name"`
-	Price      float64            `bson:"price" json:"price"`
-	Categories []string           `bson:"categories" json:"categories"`
+	ID         primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
+	Name       string              `bson:"name" json:"name"`
+	Price      float64             `bson:"price" json:"price"`
+	Categories []string            `bson:"categories" json:"categories"`
+	DeletedAt  *primitive.DateTime `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
 	// ADD BACK - Description, Dietary Restrictions, Ingredients, Allergens, Customizations
+}
+
+// Amounts are in cents : $1.00 = 100, $0.50 = 50, $245 = 24500
+// type Amount struct {
+// 	Cents int64 `bson:"cents" json:"cents"`
+// }
+
+type Order struct {
+	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
+	MenuID    primitive.ObjectID  `bson:"menu_id" json:"menu_id"`
+	Items     []MenuItemV2        `bson:"items" json:"items"`
+	Total     float64             `bson:"total" json:"total"`
+	Timestamp primitive.DateTime  `bson:"timestamp" json:"timestamp"`
+	Status    string              `bson:"status" json:"status"`
+	DeletedAt *primitive.DateTime `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
+}
+
+type Payment struct {
+	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
+	OrderID   primitive.ObjectID  `bson:"order_id" json:"order_id"`
+	Amount    float64             `bson:"amount" json:"amount"`
+	Status    string              `bson:"status" json:"status"`
+	Timestamp primitive.DateTime  `bson:"timestamp" json:"timestamp"`
+	DeletedAt *primitive.DateTime `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
 }

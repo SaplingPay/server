@@ -85,6 +85,10 @@ func GetMenuItemV2(c *gin.Context) {
 	// Iterate over the items to find the specific menu item
 	for _, item := range menu.Items {
 		if item.ID == objMenuItemID {
+			if item.DeletedAt != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "menu item not found"})
+				return
+			}
 			c.JSON(http.StatusOK, item)
 			return
 		}
@@ -248,9 +252,17 @@ func GetAllMenuItemsV2(c *gin.Context) {
 		return
 	}
 
-	if menu.Items == nil {
-		menu.Items = []models.MenuItemV2{} // Ensure the response is an empty array rather than null if no items exist
+	// Filter out deleted menu items
+	filteredItems := []models.MenuItemV2{}
+	for _, item := range menu.Items {
+		if item.DeletedAt == nil {
+			filteredItems = append(filteredItems, item)
+		}
 	}
 
-	c.JSON(http.StatusOK, menu.Items)
+	if len(filteredItems) == 0 {
+		filteredItems = []models.MenuItemV2{} // Ensure the response is an empty array rather than null if no items exist
+	}
+
+	c.JSON(http.StatusOK, filteredItems)
 }

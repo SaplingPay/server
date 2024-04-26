@@ -169,6 +169,15 @@ func SoftDeleteMenuV2(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	// Soft delete the menu items
+	menuUpdate := bson.M{
+		"$set": bson.M{"items.$[].deleted_at": primitive.NewDateTimeFromTime(time.Now())},
+	}
+	_, err = db.DB.Collection(CollectionNameMenuV2).UpdateOne(ctx, bson.M{"_id": objID}, menuUpdate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Menu soft deleted"})
 }
 
@@ -199,6 +208,23 @@ func GetMenuV2(c *gin.Context) {
 		return
 	}
 
+	// Check if the menu itself has been deleted
+	if menu.DeletedAt != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "menu not found"})
+		return
+	}
+
+	// Filter out deleted menu items
+	var filteredItems []models.MenuItemV2
+	for _, item := range menu.Items {
+		if item.DeletedAt == nil {
+			filteredItems = append(filteredItems, item)
+		}
+	}
+
+	// Update the menu with the filtered items
+	menu.Items = filteredItems
+
 	c.JSON(http.StatusOK, menu)
 }
 
@@ -210,7 +236,7 @@ func GetAllMenusV2(c *gin.Context) {
 	defer cancel()
 
 	var menus []models.MenuV2
-	cursor, err := db.DB.Collection(CollectionNameMenuV2).Find(ctx, bson.M{})
+	cursor, err := db.DB.Collection(CollectionNameMenuV2).Find(ctx, bson.M{"deleted_at": nil})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -223,6 +249,15 @@ func GetAllMenusV2(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		// Filter out deleted menu items
+		var filteredItems []models.MenuItemV2
+		for _, item := range menu.Items {
+			if item.DeletedAt == nil {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		// Update the menu with the filtered items
+		menu.Items = filteredItems
 		menus = append(menus, menu)
 	}
 
@@ -257,6 +292,15 @@ func GetMenusByVenueID(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		// Filter out deleted menu items
+		var filteredItems []models.MenuItemV2
+		for _, item := range menu.Items {
+			if item.DeletedAt == nil {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		// Update the menu with the filtered items
+		menu.Items = filteredItems
 		menus = append(menus, menu)
 	}
 

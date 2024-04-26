@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/SaplingPay/server/repositories"
 	"net/http"
 	"time"
 
@@ -11,8 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-const CollectionNameOrders = "orders"
 
 func CreateOrder(c *gin.Context) {
 	var order models.Order
@@ -28,7 +27,7 @@ func CreateOrder(c *gin.Context) {
 	// Assuming there's logic to calculate the total from order.Items
 	order.Total = calculateTotal(order.Items)
 
-	_, err := db.DB.Collection(CollectionNameOrders).InsertOne(context.Background(), order)
+	_, err := db.DB.Collection(db.CollectionNameOrders).InsertOne(context.Background(), order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -45,12 +44,12 @@ func GetOrder(c *gin.Context) {
 		return
 	}
 
-	var order models.Order
-	if err := db.DB.Collection(CollectionNameOrders).FindOne(context.Background(), bson.M{"_id": objID}).Decode(&order); err != nil {
+	order, err := repositories.GetOrderByID(objID)
+
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
 		return
 	}
-
 	c.JSON(http.StatusOK, order)
 }
 
@@ -73,7 +72,7 @@ func UpdateOrder(c *gin.Context) {
 		updates["total"] = calculateTotal(items.([]models.OrderItem))
 	}
 
-	_, err = db.DB.Collection(CollectionNameOrders).UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": updates})
+	_, err = db.DB.Collection(db.CollectionNameOrders).UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": updates})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -122,7 +121,7 @@ func SoftDeleteOrder(c *gin.Context) {
 
 func GetAllOrders(c *gin.Context) {
 	var orders []models.Order
-	cursor, err := db.DB.Collection(CollectionNameOrders).Find(context.Background(), bson.M{})
+	cursor, err := db.DB.Collection(db.CollectionNameOrders).Find(context.Background(), bson.M{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

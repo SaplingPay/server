@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/stripe/stripe-go/v78"
 	"log"
 	"os"
 
@@ -31,6 +32,13 @@ func main() {
 			log.Fatalf("Error loading .env file: %v", err)
 		}
 	}
+
+	stripeSecret := os.Getenv("STRIPE_SECRET")
+
+	if stripeSecret == "" {
+		log.Fatal("STRIPE_SECRET not found in .env file")
+	}
+	stripe.Key = stripeSecret
 
 	mongoURI := os.Getenv("MONGO_URI")
 	if mongoURI == "" {

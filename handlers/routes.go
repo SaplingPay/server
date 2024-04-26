@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/SaplingPay/server/payments"
 	"log"
 	"os"
 	"strings"
@@ -17,6 +18,8 @@ func SetUpRoutes(r *gin.Engine) {
 
 	// Wrap the routes that require authentication in the AuthMiddleware
 	r.Use(middleware.AuthMiddleware())
+
+	payments.AddStripRoutes(r)
 
 	menuRoutes := r.Group("/menus")
 	{

@@ -15,8 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const CollectionNameVenue = "venues"
-
 // CreateVenue creates a new venue in the database
 func CreateVenue(c *gin.Context) {
 	log.Println("CreateVenue")
@@ -33,7 +31,7 @@ func CreateVenue(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := db.DB.Collection(CollectionNameVenue).InsertOne(ctx, venue)
+	result, err := db.DB.Collection(db.CollectionNameVenue).InsertOne(ctx, venue)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -86,7 +84,7 @@ func UpdateVenue(c *gin.Context) {
 		}
 	}
 
-	_, err = db.DB.Collection(CollectionNameVenue).UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
+	_, err = db.DB.Collection(db.CollectionNameVenue).UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -94,7 +92,7 @@ func UpdateVenue(c *gin.Context) {
 
 	// Retrieve the updated venue from the database
 	var updatedVenue models.Venue
-	err = db.DB.Collection(CollectionNameVenue).FindOne(ctx, bson.M{"_id": objID}).Decode(&updatedVenue)
+	err = db.DB.Collection(db.CollectionNameVenue).FindOne(ctx, bson.M{"_id": objID}).Decode(&updatedVenue)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve updated venue"})
 		return
@@ -147,7 +145,7 @@ func SoftDeleteVenue(c *gin.Context) {
 	update := bson.M{
 		"$set": bson.M{"deleted_at": primitive.NewDateTimeFromTime(time.Now())},
 	}
-	_, err = db.DB.Collection(CollectionNameVenue).UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err = db.DB.Collection(db.CollectionNameVenue).UpdateOne(ctx, bson.M{"_id": objID}, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -172,7 +170,7 @@ func GetVenue(c *gin.Context) {
 
 	var venue models.Venue
 	// Use the ObjectID to find the venue
-	if err := db.DB.Collection(CollectionNameVenue).FindOne(ctx, bson.M{"_id": objID}).Decode(&venue); err != nil {
+	if err := db.DB.Collection(db.CollectionNameVenue).FindOne(ctx, bson.M{"_id": objID}).Decode(&venue); err != nil {
 		// Adjust the error handling to distinguish not found errors from other errors
 		if err == mongo.ErrNoDocuments {
 			c.JSON(http.StatusNotFound, gin.H{"error": "venue not found"})
@@ -193,7 +191,7 @@ func GetAllVenues(c *gin.Context) {
 	defer cancel()
 
 	var venues []models.Venue
-	cursor, err := db.DB.Collection(CollectionNameVenue).Find(ctx, bson.M{})
+	cursor, err := db.DB.Collection(db.CollectionNameVenue).Find(ctx, bson.M{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

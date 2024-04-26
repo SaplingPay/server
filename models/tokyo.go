@@ -19,6 +19,7 @@ type Venue struct {
 	MenuID            primitive.ObjectID   `bson:"menu_id" json:"menu_id"`
 	MenuIDs           []primitive.ObjectID `bson:"menu_ids" json:"menu_ids"`
 	ProfilePicURL     string               `bson:"profile_pic_url" json:"profile_pic_url"`
+	StripeAccountID   string               `bson:"stripe_account_id" json:"stripe_account_id"`
 	OrderingSupported bool                 `bson:"ordering_supported" json:"ordering_supported"`
 	DeletedAt         *primitive.DateTime  `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
 }
@@ -101,8 +102,16 @@ type Order struct {
 type Payment struct {
 	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
 	OrderID   primitive.ObjectID  `bson:"order_id" json:"order_id"`
+	StripeID  string              `bson:"stripe_id", json:"stripe_id"`
 	Amount    float64             `bson:"amount" json:"amount"`
 	Status    string              `bson:"status" json:"status"`
 	Timestamp primitive.DateTime  `bson:"timestamp" json:"timestamp"`
 	DeletedAt *primitive.DateTime `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"` // nil if not deleted
+}
+
+// StripeAccount temp hack figure out merchant accounts and their relation with venues
+type StripeAccount struct {
+	ID              primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	StripeAccountID string             `bson:"stripe_account_id" json:"stripe_account_id"`
+	VenueID         primitive.ObjectID `bson:"venue_id" json:"venue_id"`
 }

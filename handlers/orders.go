@@ -23,7 +23,7 @@ func CreateOrder(c *gin.Context) {
 
 	order.ID = primitive.NewObjectID() // Generate a new ID for the order
 	order.Timestamp = primitive.NewDateTimeFromTime(time.Now())
-	order.Status = "pending" // Set the default status
+	order.Status = "sent" // Set the default status
 
 	// Assuming there's logic to calculate the total from order.Items
 	order.Total = calculateTotal(order.Items)

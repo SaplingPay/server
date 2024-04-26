@@ -76,14 +76,22 @@ type MenuItemV2 struct {
 }
 
 // Amounts are in cents : $1.00 = 100, $0.50 = 50, $245 = 24500
-// type Amount struct {
-// 	Cents int64 `bson:"cents" json:"cents"`
-// }
+//
+//	type Amount struct {
+//		Cents int64 `bson:"cents" json:"cents"`
+//	}
+type OrderItem struct {
+	MenuItemID primitive.ObjectID `bson:"menu_item_id" json:"menu_item_id"`
+	Name       string             `bson:"name" json:"name"`
+	Price      float64            `bson:"price" json:"price"`
+	Quantity   int                `bson:"quantity" json:"quantity"`
+}
 
 type Order struct {
-	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
-	MenuID    primitive.ObjectID  `bson:"menu_id" json:"menu_id"`
-	Items     []MenuItemV2        `bson:"items" json:"items"`
+	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	VenueID primitive.ObjectID `bson:"venue_id" json:"venue_id"`
+	// Number    int                 `bson:"number" json:"number"`
+	Items     []OrderItem         `bson:"items" json:"items"`
 	Total     float64             `bson:"total" json:"total"`
 	Timestamp primitive.DateTime  `bson:"timestamp" json:"timestamp"`
 	Status    string              `bson:"status" json:"status"`

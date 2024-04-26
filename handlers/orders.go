@@ -21,8 +21,9 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 
-	order.ID = primitive.NewObjectID()                          // Generate a new ID for the order
-	order.Timestamp = primitive.NewDateTimeFromTime(time.Now()) // Set the current timestamp
+	order.ID = primitive.NewObjectID() // Generate a new ID for the order
+	order.Timestamp = primitive.NewDateTimeFromTime(time.Now())
+	order.Status = "sent" // Set the default status
 
 	// Assuming there's logic to calculate the total from order.Items
 	order.Total = calculateTotal(order.Items)
@@ -69,7 +70,7 @@ func UpdateOrder(c *gin.Context) {
 
 	if items, exists := updates["items"]; exists {
 		// Calculate new total if items are updated
-		updates["total"] = calculateTotal(items.([]models.MenuItemV2))
+		updates["total"] = calculateTotal(items.([]models.OrderItem))
 	}
 
 	_, err = db.DB.Collection(CollectionNameOrders).UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": updates})
@@ -140,7 +141,7 @@ func GetAllOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, orders)
 }
 
-func calculateTotal(items []models.MenuItemV2) float64 {
+func calculateTotal(items []models.OrderItem) float64 {
 	var total float64
 	// Calculation logic based on items
 	for _, item := range items {

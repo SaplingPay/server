@@ -191,7 +191,7 @@ func CreateCheckoutSession(c *gin.Context) {
 		},
 		Mode:          stripe.String(string(stripe.CheckoutSessionModePayment)),
 		SuccessURL:    stripe.String(fmt.Sprintf("%s/order-received?order_id=%s", successURL, orderId.Hex())),
-		CustomerEmail: stripe.String("KINGS DAY"),
+		CustomerEmail: stripe.String("hello@saplingpay.com"),
 	}
 	params.SetStripeAccount(os.Getenv("STRIPE_HARD_CODED_ACCOUNT_ID"))
 	result, err := session.New(params)

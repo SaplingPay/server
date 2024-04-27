@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"github.com/SaplingPay/server/payments"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/SaplingPay/server/payments"
 
 	"github.com/SaplingPay/server/middleware"
 	"github.com/gin-gonic/gin"

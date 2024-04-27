@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"context"
-	"github.com/SaplingPay/server/repositories"
 	"net/http"
 	"time"
+
+	"github.com/SaplingPay/server/repositories"
 
 	"github.com/SaplingPay/server/db"
 	"github.com/SaplingPay/server/models"
@@ -144,7 +145,7 @@ func calculateTotal(items []models.OrderItem) float64 {
 	var total float64
 	// Calculation logic based on items
 	for _, item := range items {
-		total += item.Price
+		total += item.Price * float64(item.Quantity)
 	}
 	return total
 }

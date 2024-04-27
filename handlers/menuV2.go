@@ -279,7 +279,7 @@ func GetMenusByVenueID(c *gin.Context) {
 	}
 
 	var menus []models.MenuV2
-	cursor, err := db.DB.Collection(CollectionNameMenuV2).Find(ctx, bson.M{"venue_id": objID})
+	cursor, err := db.DB.Collection(CollectionNameMenuV2).Find(ctx, bson.M{"venue_id": objID, "deleted_at": nil})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

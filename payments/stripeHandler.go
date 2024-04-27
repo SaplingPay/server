@@ -3,6 +3,10 @@ package payments
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/SaplingPay/server/models"
 	"github.com/SaplingPay/server/repositories"
 	"github.com/SaplingPay/server/utils"
@@ -12,8 +16,6 @@ import (
 	"github.com/stripe/stripe-go/v78/accountsession"
 	"github.com/stripe/stripe-go/v78/checkout/session"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
-	"net/http"
 )
 
 func AddStripRoutes(r *gin.Engine) {
@@ -143,18 +145,18 @@ func CreateCheckoutSession(c *gin.Context) {
 	}
 
 	order, err := repositories.GetOrderByID(orderId)
-
+	log.Println(order)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Order ID"})
 		return
 	}
 
-	_, err = repositories.GetStripeAccountByVenueId(order.VenueID)
+	// _, err = repositories.GetStripeAccountByVenueId(order.VenueID)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Order ID"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "No Stripe Account Linked"})
+	// 	return
+	// }
 
 	var lineItems []*stripe.CheckoutSessionLineItemParams
 
@@ -168,21 +170,26 @@ func CreateCheckoutSession(c *gin.Context) {
 				UnitAmount: stripe.Int64(int64(item.Price * 100)),
 			},
 			// TODO Handle quantity better
-			Quantity: stripe.Int64(1),
+			Quantity: stripe.Int64(int64(item.Quantity)),
 		})
+	}
+
+	successURL := os.Getenv("STRIPE_SUCCESS_URL_ORIGIN")
+	if successURL == "" {
+		c.JSON(http.StatusInternalServerError, &gin.H{"error": "missing success URL origin"})
+		return
 	}
 
 	params := &stripe.CheckoutSessionParams{
 		LineItems: lineItems,
 		PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
-			// Setup
 			ApplicationFeeAmount: stripe.Int64(0),
 		},
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String(fmt.Sprintf("https://sapling.so/success?order_id=%s", orderId)),
+		SuccessURL: stripe.String(fmt.Sprintf("%s/order-received?order_id=%s", successURL, orderId.Hex())),
 	}
 	// todo change this to prod id acct_1P9t8BKrxYc2JpQl
-	params.SetStripeAccount("acct_1P9FGBFaX9pUoWLw")
+	params.SetStripeAccount("acct_1P9xWfJcPRqoOyDQ")
 	result, err := session.New(params)
 	if err != nil {
 		handleError(c, err)
@@ -196,8 +203,8 @@ func CreateCheckoutSession(c *gin.Context) {
 	}
 
 	// if redirect doesn't work with frontend switch to json
-	//c.JSON(http.StatusOK, &gin.H{"url": result.URL})
-	c.Redirect(http.StatusFound, result.URL)
+	c.JSON(http.StatusOK, &gin.H{"url": result.URL})
+	// c.Redirect(http.StatusFound, result.URL)
 }
 
 func handleError(c *gin.Context, err error) {

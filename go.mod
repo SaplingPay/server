@@ -7,7 +7,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/joho/godotenv v1.5.1
 	github.com/sashabaranov/go-openai v1.20.4
-	github.com/stripe/stripe-go/v78 v78.3.0
+	github.com/stripe/stripe-go/v78 v78.4.0
 	go.mongodb.org/mongo-driver v1.14.0
 )
 

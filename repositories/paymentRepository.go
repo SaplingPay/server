@@ -2,11 +2,12 @@ package repositories
 
 import (
 	"context"
+	"time"
+
 	"github.com/SaplingPay/server/db"
 	"github.com/SaplingPay/server/models"
 	"github.com/stripe/stripe-go/v78"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 func CreatePayment(order *models.Order, session *stripe.CheckoutSession) (models.Payment, error) {
@@ -15,7 +16,7 @@ func CreatePayment(order *models.Order, session *stripe.CheckoutSession) (models
 
 	payment := models.Payment{
 		ID:       primitive.NewObjectID(),
-		Amount:   float64(session.AmountTotal),
+		Amount:   float64(session.AmountTotal) / 100,
 		Status:   string(session.Status),
 		OrderID:  order.ID,
 		StripeID: session.ID,

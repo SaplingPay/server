@@ -102,7 +102,7 @@ type Order struct {
 type Payment struct {
 	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
 	OrderID   primitive.ObjectID  `bson:"order_id" json:"order_id"`
-	StripeID  string              `bson:"stripe_id", json:"stripe_id"`
+	StripeID  string              `bson:"stripe_id" json:"stripe_id"`
 	Amount    float64             `bson:"amount" json:"amount"`
 	Status    string              `bson:"status" json:"status"`
 	Timestamp primitive.DateTime  `bson:"timestamp" json:"timestamp"`

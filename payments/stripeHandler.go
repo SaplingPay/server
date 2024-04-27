@@ -182,6 +182,10 @@ func CreateCheckoutSession(c *gin.Context) {
 
 	params := &stripe.CheckoutSessionParams{
 		LineItems: lineItems,
+		PaymentMethodTypes: stripe.StringSlice([]string{
+			"card",
+			"ideal",
+		}),
 		PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 			ApplicationFeeAmount: stripe.Int64(0),
 		},

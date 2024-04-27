@@ -188,8 +188,7 @@ func CreateCheckoutSession(c *gin.Context) {
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
 		SuccessURL: stripe.String(fmt.Sprintf("%s/order-received?order_id=%s", successURL, orderId.Hex())),
 	}
-	// todo change this to prod id acct_1P9t8BKrxYc2JpQl
-	params.SetStripeAccount("acct_1P9xWfJcPRqoOyDQ")
+	params.SetStripeAccount(os.Getenv("STRIPE_HARD_CODED_ACCOUNT_ID"))
 	result, err := session.New(params)
 	if err != nil {
 		handleError(c, err)
